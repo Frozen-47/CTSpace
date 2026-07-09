@@ -43,8 +43,7 @@ CREATE TABLE IF NOT EXISTS students (
   id TEXT PRIMARY KEY DEFAULT 's-' || md5(random()::text),
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  major TEXT NOT NULL,
-  year TEXT NOT NULL
+  class_group TEXT NOT NULL
 );
 
 -- 4. Classes Table
@@ -56,7 +55,8 @@ CREATE TABLE IF NOT EXISTS classes (
   schedule_days TEXT[] NOT NULL,
   schedule_time TEXT NOT NULL,
   capacity INT NOT NULL DEFAULT 30,
-  term TEXT NOT NULL DEFAULT 'Fall 2026'
+  term TEXT NOT NULL DEFAULT 'Fall 2026',
+  class_group TEXT NOT NULL
 );
 
 -- 5. Enrollments Table

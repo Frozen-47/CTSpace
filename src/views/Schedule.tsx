@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Calendar, Search, MapPin, User, Users, Trash2, Edit } from 'lucide-react';
-import type { Course, Instructor, ClassInstance, Enrollment } from '../mock/mockData';
+import { CLASS_GROUPS, type Course, type Instructor, type ClassInstance, type Enrollment } from '../mock/mockData';
 
 interface ScheduleProps {
   classes: ClassInstance[];
@@ -24,6 +24,7 @@ export const Schedule: React.FC<ScheduleProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [dayFilter, setDayFilter] = useState('all');
   const [termFilter, setTermFilter] = useState('Fall 2026');
+  const [classGroupFilter, setClassGroupFilter] = useState('all');
 
   const getEnrollmentCount = (classId: string) => {
     return enrollments.filter(e => e.classId === classId).length;
@@ -51,8 +52,9 @@ export const Schedule: React.FC<ScheduleProps> = ({
 
     const matchesDay = dayFilter === 'all' || cls.scheduleDays.includes(dayFilter);
     const matchesTerm = cls.term === termFilter;
+    const matchesClassGroup = classGroupFilter === 'all' || cls.classGroup === classGroupFilter;
 
-    return matchesSearch && matchesDay && matchesTerm;
+    return matchesSearch && matchesDay && matchesTerm && matchesClassGroup;
   });
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -82,6 +84,16 @@ export const Schedule: React.FC<ScheduleProps> = ({
           />
         </div>
         <div className="filters-grid">
+          <select
+            className="form-select"
+            value={classGroupFilter}
+            onChange={(e) => setClassGroupFilter(e.target.value)}
+          >
+            <option value="all">All Batches</option>
+            {CLASS_GROUPS.map(cg => (
+              <option key={cg} value={cg}>{cg}</option>
+            ))}
+          </select>
           <select
             className="form-select"
             value={dayFilter}
@@ -118,6 +130,7 @@ export const Schedule: React.FC<ScheduleProps> = ({
                   <div className="class-schedule-header">
                     <div className="course-identifier">
                       <span className="code-badge">{course?.code || 'CS-???'}</span>
+                      <span className="badge badge-info">{cls.classGroup}</span>
                       <span className="term-badge">{cls.term}</span>
                     </div>
                     <div className="schedule-actions">

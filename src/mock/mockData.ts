@@ -15,12 +15,19 @@ export interface Instructor {
   specialization: string;
 }
 
+export const CLASS_GROUPS = [
+  '3rd CT (2024-2027)',
+  '2nd CT (2025-2027)',
+  '2nd BBA (2025-2027)'
+] as const;
+
+export type ClassGroupType = typeof CLASS_GROUPS[number];
+
 export interface Student {
   id: string;
   name: string;
   email: string;
-  major: string;
-  year: string;
+  classGroup: ClassGroupType;
 }
 
 export interface ClassInstance {
@@ -32,13 +39,14 @@ export interface ClassInstance {
   scheduleTime: string; // e.g., '10:00 AM - 11:30 AM'
   capacity: number;
   term: string;
+  classGroup: ClassGroupType;
 }
 
 export interface Enrollment {
   id: string;
   studentId: string;
   classId: string;
-  grade: string; // e.g., 'A', 'B', 'B+', 'IP' (In Progress)
+  grade: string; // e.g., 'A', 'B', 'IP' (In Progress)
 }
 
 export const INITIAL_COURSES: Course[] = [
@@ -122,14 +130,14 @@ export const INITIAL_INSTRUCTORS: Instructor[] = [
 ];
 
 export const INITIAL_STUDENTS: Student[] = [
-  { id: 's-1', name: 'Alice Smith', email: 'a.smith@student.edu', major: 'Computer Science', year: 'Senior' },
-  { id: 's-2', name: 'Bob Johnson', email: 'b.johnson@student.edu', major: 'Computer Science', year: 'Junior' },
-  { id: 's-3', name: 'Charlie Davis', email: 'c.davis@student.edu', major: 'Computer Engineering', year: 'Sophomore' },
-  { id: 's-4', name: 'Diana Prince', email: 'd.prince@student.edu', major: 'Computer Science', year: 'Senior' },
-  { id: 's-5', name: 'Ethan Hunt', email: 'e.hunt@student.edu', major: 'Software Engineering', year: 'Freshman' },
-  { id: 's-6', name: 'Fiona Gallagher', email: 'f.gallagher@student.edu', major: 'Computer Science', year: 'Sophomore' },
-  { id: 's-7', name: 'George Harrison', email: 'g.harrison@student.edu', major: 'Data Science', year: 'Junior' },
-  { id: 's-8', name: 'Hannah Abbott', email: 'h.abbott@student.edu', major: 'Computer Science', year: 'Freshman' }
+  { id: 's-1', name: 'Alice Smith', email: 'a.smith@student.edu', classGroup: '3rd CT (2024-2027)' },
+  { id: 's-2', name: 'Bob Johnson', email: 'b.johnson@student.edu', classGroup: '3rd CT (2024-2027)' },
+  { id: 's-3', name: 'Charlie Davis', email: 'c.davis@student.edu', classGroup: '2nd CT (2025-2027)' },
+  { id: 's-4', name: 'Diana Prince', email: 'd.prince@student.edu', classGroup: '3rd CT (2024-2027)' },
+  { id: 's-5', name: 'Ethan Hunt', email: 'e.hunt@student.edu', classGroup: '2nd BBA (2025-2027)' },
+  { id: 's-6', name: 'Fiona Gallagher', email: 'f.gallagher@student.edu', classGroup: '2nd CT (2025-2027)' },
+  { id: 's-7', name: 'George Harrison', email: 'g.harrison@student.edu', classGroup: '2nd BBA (2025-2027)' },
+  { id: 's-8', name: 'Hannah Abbott', email: 'h.abbott@student.edu', classGroup: '2nd CT (2025-2027)' }
 ];
 
 export const INITIAL_CLASSES: ClassInstance[] = [
@@ -137,51 +145,56 @@ export const INITIAL_CLASSES: ClassInstance[] = [
     id: 'cls-1',
     courseId: 'c-1',
     instructorId: 'i-4',
-    room: 'Tech Hall 101',
+    room: 'Tech Room 101',
     scheduleDays: ['Monday', 'Wednesday'],
     scheduleTime: '09:00 AM - 10:30 AM',
     capacity: 40,
-    term: 'Fall 2026'
+    term: 'Fall 2026',
+    classGroup: '2nd BBA (2025-2027)'
   },
   {
     id: 'cls-2',
     courseId: 'c-2',
     instructorId: 'i-3',
-    room: 'Tech Hall 204',
+    room: 'Tech Room 204',
     scheduleDays: ['Tuesday', 'Thursday'],
     scheduleTime: '11:00 AM - 12:30 PM',
     capacity: 35,
-    term: 'Fall 2026'
+    term: 'Fall 2026',
+    classGroup: '2nd CT (2025-2027)'
   },
   {
     id: 'cls-3',
     courseId: 'c-3',
     instructorId: 'i-2',
-    room: 'Tech Hall 301',
+    room: 'Tech Room 301',
     scheduleDays: ['Monday', 'Wednesday'],
     scheduleTime: '01:00 PM - 02:30 PM',
     capacity: 30,
-    term: 'Fall 2026'
+    term: 'Fall 2026',
+    classGroup: '3rd CT (2024-2027)'
   },
   {
     id: 'cls-4',
     courseId: 'c-4',
     instructorId: 'i-4',
-    room: 'Tech Hall 102',
+    room: 'Tech Room 102',
     scheduleDays: ['Tuesday', 'Thursday'],
     scheduleTime: '09:00 AM - 10:30 AM',
     capacity: 25,
-    term: 'Fall 2026'
+    term: 'Fall 2026',
+    classGroup: '3rd CT (2024-2027)'
   },
   {
     id: 'cls-5',
     courseId: 'c-5',
     instructorId: 'i-1',
-    room: 'Tech Hall 401',
+    room: 'Tech Room 401',
     scheduleDays: ['Monday', 'Wednesday'],
     scheduleTime: '10:00 AM - 11:30 AM',
     capacity: 25,
-    term: 'Fall 2026'
+    term: 'Fall 2026',
+    classGroup: '3rd CT (2024-2027)'
   }
 ];
 

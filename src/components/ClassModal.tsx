@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader } from 'lucide-react';
-import type { Course, Instructor, Student, ClassInstance } from '../mock/mockData';
+import { CLASS_GROUPS, type Course, type Instructor, type Student, type ClassInstance } from '../mock/mockData';
 
 interface ClassModalProps {
   isOpen: boolean;
@@ -52,10 +52,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
           scheduleDays: [],
           scheduleTime: '09:00 AM - 10:30 AM',
           capacity: 30,
-          term: 'Fall 2026'
+          term: 'Fall 2026',
+          classGroup: CLASS_GROUPS[0]
         });
       } else if (type === 'student') {
-        setFormData({ name: '', email: '', major: 'Computer Science', year: 'Freshman' });
+        setFormData({ name: '', email: '', classGroup: CLASS_GROUPS[0] });
       } else if (type === 'enrollment') {
         setFormData({
           studentId: students[0]?.id || '',
@@ -386,6 +387,21 @@ export const ClassModal: React.FC<ClassModalProps> = ({
               </div>
 
               <div className="form-group">
+                <label className="form-label">Class Group (Cohort)</label>
+                <select
+                  name="classGroup"
+                  className="form-select"
+                  value={formData.classGroup || CLASS_GROUPS[0]}
+                  onChange={handleInputChange}
+                  required
+                >
+                  {CLASS_GROUPS.map(cg => (
+                    <option key={cg} value={cg}>{cg}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label className="form-label">Days of Week</label>
                 <div className="days-checkbox-grid">
                   {daysOfWeek.map(day => {
@@ -433,33 +449,19 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                   required
                 />
               </div>
-              <div className="form-row">
-                <div className="form-group flex-1">
-                  <label className="form-label">Major</label>
-                  <input
-                    type="text"
-                    name="major"
-                    className="form-input"
-                    placeholder="e.g., Computer Science"
-                    value={formData.major || 'Computer Science'}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group flex-1">
-                  <label className="form-label">Academic Year</label>
-                  <select
-                    name="year"
-                    className="form-select"
-                    value={formData.year || 'Freshman'}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Freshman">Freshman</option>
-                    <option value="Sophomore">Sophomore</option>
-                    <option value="Junior">Junior</option>
-                    <option value="Senior">Senior</option>
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Class Group (Cohort)</label>
+                <select
+                  name="classGroup"
+                  className="form-select"
+                  value={formData.classGroup || CLASS_GROUPS[0]}
+                  onChange={handleInputChange}
+                  required
+                >
+                  {CLASS_GROUPS.map(cg => (
+                    <option key={cg} value={cg}>{cg}</option>
+                  ))}
+                </select>
               </div>
             </>
           )}
@@ -478,7 +480,7 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                   disabled={!!initialData} // Lock student choice during edit
                 >
                   {students.map(s => (
-                    <option key={s.id} value={s.id}>{s.name} ({s.year})</option>
+                    <option key={s.id} value={s.id}>{s.name} ({s.classGroup})</option>
                   ))}
                 </select>
               </div>

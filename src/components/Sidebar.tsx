@@ -45,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         <div className="brand-text">
           <h1>CTSpace</h1>
-          <span>CS Department</span>
+          <span>CT Department</span>
         </div>
       </div>
 

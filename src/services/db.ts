@@ -72,8 +72,9 @@ export function checkSchedulingConflict(
   days: string[],
   time: string,
   term: string,
+  classGroup: string,
   existingClasses: ClassInstance[]
-): { conflict: boolean; type?: 'instructor' | 'room'; message?: string } {
+): { conflict: boolean; type?: 'instructor' | 'room' | 'classGroup'; message?: string } {
   for (const cls of existingClasses) {
     // Ignore self if editing
     if (classId && cls.id === classId) continue;
@@ -95,6 +96,14 @@ export function checkSchedulingConflict(
             conflict: true,
             type: 'room',
             message: `Room "${cls.room}" is already booked for another class during this timeslot.`
+          };
+        }
+        // Class group conflict
+        if (cls.classGroup === classGroup) {
+          return {
+            conflict: true,
+            type: 'classGroup',
+            message: `Class group "${classGroup}" is already scheduled for another class during this timeslot.`
           };
         }
       }
@@ -290,6 +299,7 @@ export const db = {
       cls.scheduleDays,
       cls.scheduleTime,
       cls.term,
+      cls.classGroup,
       existingClasses
     );
 

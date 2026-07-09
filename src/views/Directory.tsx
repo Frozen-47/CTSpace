@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Plus, User, Mail, BookOpen, Trash2, Edit, Award, MapPin, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
-import type { Course, Instructor, Student, ClassInstance, Enrollment } from '../mock/mockData';
+import { CLASS_GROUPS, type Course, type Instructor, type Student, type ClassInstance, type Enrollment } from '../mock/mockData';
 
 interface DirectoryProps {
   instructors: Instructor[];
@@ -36,6 +36,7 @@ export const Directory: React.FC<DirectoryProps> = ({
   const [activeTab, setActiveTab] = useState<'faculty' | 'students'>('faculty');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
+  const [studentClassFilter, setStudentClassFilter] = useState('all');
 
   const toggleStudentExpand = (studentId: string) => {
     setExpandedStudentId(expandedStudentId === studentId ? null : studentId);
@@ -78,12 +79,14 @@ export const Directory: React.FC<DirectoryProps> = ({
     i.office.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.major.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.year.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students.filter(s => {
+    const matchesSearch = 
+      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesClass = studentClassFilter === 'all' || s.classGroup === studentClassFilter;
+    return matchesSearch && matchesClass;
+  });
 
   return (
     <div className="directory-view animate-fade-in">
@@ -123,15 +126,29 @@ export const Directory: React.FC<DirectoryProps> = ({
           </button>
         </div>
 
-        <div className="search-input-wrapper">
-          <Search size={14} className="search-icon" />
-          <input
-            type="text"
-            className="form-input search-input"
-            placeholder={activeTab === 'faculty' ? "Search faculty..." : "Search students..."}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="search-input-wrapper-flex">
+          {activeTab === 'students' && (
+            <select
+              className="form-select filter-select-dir"
+              value={studentClassFilter}
+              onChange={(e) => setStudentClassFilter(e.target.value)}
+            >
+              <option value="all">All Batches</option>
+              {CLASS_GROUPS.map(cg => (
+                <option key={cg} value={cg}>{cg}</option>
+              ))}
+            </select>
+          )}
+          <div className="search-input-wrapper">
+            <Search size={14} className="search-icon" />
+            <input
+              type="text"
+              className="form-input search-input"
+              placeholder={activeTab === 'faculty' ? "Search faculty..." : "Search students..."}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </section>
 
@@ -223,10 +240,7 @@ export const Directory: React.FC<DirectoryProps> = ({
 
                       <div className="student-academic-info">
                         <div className="academic-tag">
-                          <span>{student.major}</span>
-                        </div>
-                        <div className="academic-tag">
-                          <span>{student.year}</span>
+                          <span>{student.classGroup}</span>
                         </div>
                       </div>
 
@@ -395,6 +409,18 @@ export const Directory: React.FC<DirectoryProps> = ({
 
         .search-input {
           padding-left: 36px;
+        }
+
+        .search-input-wrapper-flex {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          flex: 1;
+          justify-content: flex-end;
+        }
+
+        .filter-select-dir {
+          max-width: 160px;
         }
 
         .faculty-grid {
