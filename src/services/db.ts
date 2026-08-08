@@ -112,14 +112,66 @@ export function checkSchedulingConflict(
   return { conflict: false };
 }
 
+// --- Column Mappers for Supabase (snake_case <-> camelCase) ---
+
+const mapStudentFromDb = (row: any): Student => ({
+  id: row.id,
+  name: row.name,
+  email: row.email,
+  classGroup: row.class_group || row.classGroup
+});
+
+const mapStudentToDb = (s: Partial<Student>) => {
+  const payload: any = { ...s };
+  if (payload.classGroup !== undefined) {
+    payload.class_group = payload.classGroup;
+    delete payload.classGroup;
+  }
+  return payload;
+};
+
+const mapClassFromDb = (row: any): ClassInstance => ({
+  id: row.id,
+  courseId: row.course_id || row.courseId,
+  instructorId: row.instructor_id || row.instructorId,
+  room: row.room,
+  scheduleDays: row.schedule_days || row.scheduleDays || [],
+  scheduleTime: row.schedule_time || row.scheduleTime,
+  capacity: row.capacity,
+  term: row.term,
+  classGroup: row.class_group || row.classGroup
+});
+
+const mapClassToDb = (cls: Partial<ClassInstance>) => {
+  const payload: any = { ...cls };
+  if (payload.courseId !== undefined) { payload.course_id = payload.courseId; delete payload.courseId; }
+  if (payload.instructorId !== undefined) { payload.instructor_id = payload.instructorId; delete payload.instructorId; }
+  if (payload.scheduleDays !== undefined) { payload.schedule_days = payload.scheduleDays; delete payload.scheduleDays; }
+  if (payload.scheduleTime !== undefined) { payload.schedule_time = payload.scheduleTime; delete payload.scheduleTime; }
+  if (payload.classGroup !== undefined) { payload.class_group = payload.classGroup; delete payload.classGroup; }
+  return payload;
+};
+
+const mapEnrollmentFromDb = (row: any): Enrollment => ({
+  id: row.id,
+  studentId: row.student_id || row.studentId,
+  classId: row.class_id || row.classId,
+  grade: row.grade
+});
+
+const mapEnrollmentToDb = (e: Partial<Enrollment>) => {
+  const payload: any = { ...e };
+  if (payload.studentId !== undefined) { payload.student_id = payload.studentId; delete payload.studentId; }
+  if (payload.classId !== undefined) { payload.class_id = payload.classId; delete payload.classId; }
+  return payload;
+};
+
 // --- Database Operations ---
 
 export const db = {
   // Reset database to initial seeds
   resetDatabase: async (): Promise<void> => {
     if (useSupabase()) {
-      // For Supabase, reset wouldn't normally be fully automatic unless tables are cleared,
-      // but in this configuration we just reset localStorage.
       console.warn("Reset operation is only available in mock mode.");
     }
     localStorage.removeItem('ctspace_courses');
@@ -127,6 +179,37 @@ export const db = {
     localStorage.removeItem('ctspace_students');
     localStorage.removeItem('ctspace_classes');
     localStorage.removeItem('ctspace_enrollments');
+  },
+
+  // Export full database state as a JSON string
+  exportDatabaseJSON: async (): Promise<string> => {
+    const data = {
+      courses: await db.getCourses(),
+      instructors: await db.getInstructors(),
+      students: await db.getStudents(),
+      classes: await db.getClasses(),
+      enrollments: await db.getEnrollments(),
+      exportedAt: new Date().toISOString(),
+      version: '1.0'
+    };
+    return JSON.stringify(data, null, 2);
+  },
+
+  // Import full database state from JSON
+  importDatabaseJSON: async (jsonString: string): Promise<void> => {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error('Invalid JSON format.');
+      }
+      if (Array.isArray(parsed.courses)) setLocal('courses', parsed.courses);
+      if (Array.isArray(parsed.instructors)) setLocal('instructors', parsed.instructors);
+      if (Array.isArray(parsed.students)) setLocal('students', parsed.students);
+      if (Array.isArray(parsed.classes)) setLocal('classes', parsed.classes);
+      if (Array.isArray(parsed.enrollments)) setLocal('enrollments', parsed.enrollments);
+    } catch (err: any) {
+      throw new Error(`Failed to parse database backup file: ${err.message}`);
+    }
   },
 
   // Courses CRUD
@@ -234,21 +317,22 @@ export const db = {
     if (useSupabase()) {
       const { data, error } = await supabase.from('students').select('*').order('name');
       if (error) throw error;
-      return data;
+      return (data || []).map(mapStudentFromDb);
     }
     return getLocal<Student>('students', INITIAL_STUDENTS).sort((a, b) => a.name.localeCompare(b.name));
   },
 
   saveStudent: async (student: Omit<Student, 'id'> & { id?: string }): Promise<Student> => {
     if (useSupabase()) {
+      const payload = mapStudentToDb(student);
       if (student.id) {
-        const { data, error } = await supabase.from('students').update(student).eq('id', student.id).select().single();
+        const { data, error } = await supabase.from('students').update(payload).eq('id', student.id).select().single();
         if (error) throw error;
-        return data;
+        return mapStudentFromDb(data);
       } else {
-        const { data, error } = await supabase.from('students').insert(student).select().single();
+        const { data, error } = await supabase.from('students').insert(payload).select().single();
         if (error) throw error;
-        return data;
+        return mapStudentFromDb(data);
       }
     } else {
       const students = getLocal<Student>('students', INITIAL_STUDENTS);
@@ -284,7 +368,7 @@ export const db = {
     if (useSupabase()) {
       const { data, error } = await supabase.from('classes').select('*');
       if (error) throw error;
-      return data;
+      return (data || []).map(mapClassFromDb);
     }
     return getLocal<ClassInstance>('classes', INITIAL_CLASSES);
   },
@@ -308,14 +392,15 @@ export const db = {
     }
 
     if (useSupabase()) {
+      const payload = mapClassToDb(cls);
       if (cls.id) {
-        const { data, error } = await supabase.from('classes').update(cls).eq('id', cls.id).select().single();
+        const { data, error } = await supabase.from('classes').update(payload).eq('id', cls.id).select().single();
         if (error) throw error;
-        return data;
+        return mapClassFromDb(data);
       } else {
-        const { data, error } = await supabase.from('classes').insert(cls).select().single();
+        const { data, error } = await supabase.from('classes').insert(payload).select().single();
         if (error) throw error;
-        return data;
+        return mapClassFromDb(data);
       }
     } else {
       const classes = getLocal<ClassInstance>('classes', INITIAL_CLASSES);
@@ -351,21 +436,22 @@ export const db = {
     if (useSupabase()) {
       const { data, error } = await supabase.from('enrollments').select('*');
       if (error) throw error;
-      return data;
+      return (data || []).map(mapEnrollmentFromDb);
     }
     return getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS);
   },
 
   saveEnrollment: async (enrollment: Omit<Enrollment, 'id'> & { id?: string }): Promise<Enrollment> => {
     if (useSupabase()) {
+      const payload = mapEnrollmentToDb(enrollment);
       if (enrollment.id) {
-        const { data, error } = await supabase.from('enrollments').update(enrollment).eq('id', enrollment.id).select().single();
+        const { data, error } = await supabase.from('enrollments').update(payload).eq('id', enrollment.id).select().single();
         if (error) throw error;
-        return data;
+        return mapEnrollmentFromDb(data);
       } else {
-        const { data, error } = await supabase.from('enrollments').insert(enrollment).select().single();
+        const { data, error } = await supabase.from('enrollments').insert(payload).select().single();
         if (error) throw error;
-        return data;
+        return mapEnrollmentFromDb(data);
       }
     } else {
       const enrollments = getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS);

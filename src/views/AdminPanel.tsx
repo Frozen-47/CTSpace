@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Database, RefreshCw, AlertTriangle, Check, Copy } from 'lucide-react';
+import { Database, RefreshCw, AlertTriangle, Check, Copy, Download, Upload, ShieldCheck, HardDrive } from 'lucide-react';
+import { db } from '../services/db';
 
 interface AdminPanelProps {
   useSupabase: boolean;
   onToggleSupabase: (value: boolean) => void;
   onResetDatabase: () => Promise<void>;
+  onRefreshData?: () => Promise<void>;
   statusMessage?: { type: 'success' | 'error'; text: string } | null;
 }
 
@@ -12,12 +14,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   useSupabase,
   onToggleSupabase,
   onResetDatabase,
+  onRefreshData,
   statusMessage
 }) => {
   const [copied, setCopied] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
-  const sqlMigration = `-- CTSpace PostgreSQL Schema Migration Script
+  const sqlMigration = `-- CTSpace Supabase PostgreSQL Migration & Seed Script
 
 -- 1. Courses Table
 CREATE TABLE IF NOT EXISTS courses (
@@ -50,7 +54,7 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS classes (
   id TEXT PRIMARY KEY DEFAULT 'cls-' || md5(random()::text),
   course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  instructor_id TEXT REFERENCES instructors(id) ON SET NULL,
+  instructor_id TEXT REFERENCES instructors(id) ON DELETE SET NULL,
   room TEXT NOT NULL,
   schedule_days TEXT[] NOT NULL,
   schedule_time TEXT NOT NULL,
@@ -66,7 +70,20 @@ CREATE TABLE IF NOT EXISTS enrollments (
   class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
   grade TEXT NOT NULL DEFAULT 'IP',
   UNIQUE(student_id, class_id)
-);`;
+);
+
+-- Enable RLS & Allow Anonymous Access for Demo
+ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE instructors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Read/Write Courses" ON courses FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Read/Write Instructors" ON instructors FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Read/Write Students" ON students FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Read/Write Classes" ON classes FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Read/Write Enrollments" ON enrollments FOR ALL USING (true) WITH CHECK (true);`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(sqlMigration);
@@ -83,21 +100,84 @@ CREATE TABLE IF NOT EXISTS enrollments (
     setResetting(false);
   };
 
+  const handleExportJSON = async () => {
+    try {
+      const jsonStr = await db.exportDatabaseJSON();
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ctspace_db_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(`Export failed: ${err.message}`);
+    }
+  };
+
+  const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        setImporting(true);
+        const content = e.target?.result as string;
+        await db.importDatabaseJSON(content);
+        if (onRefreshData) await onRefreshData();
+        alert("Database backup imported successfully!");
+      } catch (err: any) {
+        alert(`Import error: ${err.message}`);
+      } finally {
+        setImporting(false);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="admin-panel-view animate-fade-in">
       <header className="view-header">
         <div>
           <h1>Administration</h1>
-          <p className="subtitle">Database engines, migration setup, and local state reset tools.</p>
+          <p className="subtitle">Database engines, migration setup, and local state management tools.</p>
         </div>
       </header>
+
+      {/* 100% Free Database Banner */}
+      <section className="admin-section card free-db-banner">
+        <div className="admin-section-header">
+          <ShieldCheck size={22} className="text-success" />
+          <div>
+            <h2>100% Free Built-in Local Database</h2>
+            <p>CTSpace comes with a 100% free, zero-cost, serverless database engine built directly into your browser.</p>
+          </div>
+        </div>
+        <div className="free-db-features">
+          <div className="free-feature-pill">
+            <HardDrive size={14} />
+            <span>Zero Subscription or Cloud Fees</span>
+          </div>
+          <div className="free-feature-pill">
+            <Check size={14} />
+            <span>Instant Client-Side Persistence</span>
+          </div>
+          <div className="free-feature-pill">
+            <Download size={14} />
+            <span>One-Click Backup Export & Import</span>
+          </div>
+        </div>
+      </section>
 
       <section className="admin-section card">
         <div className="admin-section-header">
           <Database size={18} className="section-icon" />
           <div>
-            <h2>Database Engine</h2>
-            <p>Select connection provider for class data storage.</p>
+            <h2>Database Engine Selector</h2>
+            <p>Select your connection provider for CTSpace data storage.</p>
           </div>
         </div>
 
@@ -106,16 +186,16 @@ CREATE TABLE IF NOT EXISTS enrollments (
             <div className={`engine-option ${!useSupabase ? 'selected' : ''}`} onClick={() => onToggleSupabase(false)}>
               <div className="option-indicator" />
               <div>
-                <h3>Mock Storage</h3>
-                <p>Stores data locally in your browser. Zero setup required.</p>
+                <h3>Free Local Browser DB (Recommended)</h3>
+                <p>100% free forever. Stores data locally in your browser. Zero setup required.</p>
               </div>
             </div>
             
             <div className={`engine-option ${useSupabase ? 'selected' : ''}`} onClick={() => onToggleSupabase(true)}>
               <div className="option-indicator" />
               <div>
-                <h3>Supabase Client</h3>
-                <p>Connects to remote PostgreSQL server. Requires env credentials.</p>
+                <h3>Supabase Client (Free Cloud Tier)</h3>
+                <p>Connects to a remote PostgreSQL server. Requires free Supabase credentials.</p>
               </div>
             </div>
           </div>
@@ -124,24 +204,54 @@ CREATE TABLE IF NOT EXISTS enrollments (
         {useSupabase && (
           <div className="supabase-warning-alert">
             <AlertTriangle size={14} />
-            <span>Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are present in your workspace variables.</span>
+            <span>Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are present in your environment variables.</span>
           </div>
         )}
+      </section>
+
+      {/* Backup & Data Management */}
+      <section className="admin-section card">
+        <div className="admin-section-header">
+          <HardDrive size={18} className="section-icon" />
+          <div>
+            <h2>Free Backup & Data Management</h2>
+            <p>Export your full database to a JSON file or restore from a previous backup.</p>
+          </div>
+        </div>
+
+        <div className="backup-actions-grid">
+          <div className="backup-card">
+            <h4>Export Database</h4>
+            <p>Download a complete `.json` snapshot of all courses, instructors, students, classes, and enrollments.</p>
+            <button className="btn btn-secondary" onClick={handleExportJSON}>
+              <Download size={14} /> Export JSON Snapshot
+            </button>
+          </div>
+
+          <div className="backup-card">
+            <h4>Import Database</h4>
+            <p>Restore database records from an exported `.json` snapshot file.</p>
+            <label className="btn btn-secondary file-upload-btn">
+              <Upload size={14} /> {importing ? 'Importing...' : 'Upload JSON File'}
+              <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
+            </label>
+          </div>
+        </div>
       </section>
 
       <section className="admin-section card">
         <div className="admin-section-header">
           <RefreshCw size={18} className="section-icon" />
           <div>
-            <h2>Data Reset</h2>
-            <p>Restore seed database items.</p>
+            <h2>Factory Data Reset</h2>
+            <p>Restore original seed dataset.</p>
           </div>
         </div>
 
         <div className="reset-action-box">
-          <p className="description-text">Erase local workspace changes and restore curriculum and roster default values. This is irreversible.</p>
+          <p className="description-text">Erase local workspace modifications and restore curriculum and roster initial default values.</p>
           <button className="btn btn-danger" onClick={handleReset} disabled={resetting || useSupabase}>
-            {resetting ? 'Resetting...' : 'Reset Local Storage'}
+            {resetting ? 'Resetting...' : 'Reset to Default Seeds'}
           </button>
         </div>
       </section>
@@ -191,6 +301,71 @@ CREATE TABLE IF NOT EXISTS enrollments (
           font-weight: 700;
           letter-spacing: -0.02em;
           color: var(--text-primary);
+        }
+
+        .free-db-banner {
+          background-color: var(--success-bg);
+          border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .free-db-features {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-top: 8px;
+        }
+
+        .free-feature-pill {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          color: var(--success);
+          background-color: var(--bg-card);
+          padding: 6px 12px;
+          border-radius: var(--radius-sm);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .backup-actions-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+
+        @media (max-width: 600px) {
+          .backup-actions-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .backup-card {
+          background-color: var(--bg-card-hover);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm);
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .backup-card h4 {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .backup-card p {
+          font-size: 0.78rem;
+          color: var(--text-secondary);
+          line-height: 1.3;
+          flex: 1;
+        }
+
+        .file-upload-btn {
+          display: inline-flex;
+          cursor: pointer;
         }
 
         .admin-section {

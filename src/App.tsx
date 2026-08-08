@@ -247,6 +247,7 @@ function App() {
             useSupabase={useSupabase}
             onToggleSupabase={handleToggleSupabase}
             onResetDatabase={handleResetDatabase}
+            onRefreshData={fetchAllData}
             statusMessage={statusMessage}
           />
         )}
