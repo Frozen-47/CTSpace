@@ -7,7 +7,10 @@ import {
   Sliders, 
   Sun, 
   Moon,
-  Database
+  Database,
+  Shield,
+  UserCheck,
+  GraduationCap
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -16,6 +19,8 @@ interface SidebarProps {
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
   useSupabase: boolean;
+  currentRole: 'admin' | 'faculty' | 'student';
+  setCurrentRole: (role: 'admin' | 'faculty' | 'student') => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -23,7 +28,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab, 
   theme, 
   setTheme,
-  useSupabase
+  useSupabase,
+  currentRole,
+  setCurrentRole
 }) => {
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -37,6 +44,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'admin', label: 'Admin Panel', icon: Sliders },
   ];
 
+  const roleLabels = {
+    admin: { label: 'Admin Mode', icon: Shield, badgeClass: 'badge-admin' },
+    faculty: { label: 'Faculty View', icon: UserCheck, badgeClass: 'badge-faculty' },
+    student: { label: 'Student View', icon: GraduationCap, badgeClass: 'badge-student' }
+  };
+
+  const RoleIcon = roleLabels[currentRole].icon;
+
   return (
     <aside className="sidebar-container">
       <div className="sidebar-brand">
@@ -47,6 +62,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <h1>CTSpace</h1>
           <span>CT Department</span>
         </div>
+      </div>
+
+      <div className="role-sidebar-card">
+        <div className="role-card-header">
+          <RoleIcon size={16} />
+          <span>{roleLabels[currentRole].label}</span>
+        </div>
+        <button 
+          className="role-switch-btn" 
+          onClick={() => {
+            setActiveTab('dashboard');
+            const roles: ('admin' | 'faculty' | 'student')[] = ['admin', 'faculty', 'student'];
+            const nextIdx = (roles.indexOf(currentRole) + 1) % roles.length;
+            setCurrentRole(roles[nextIdx]);
+          }}
+          title="Click to cycle role"
+        >
+          Switch Role
+        </button>
       </div>
 
       <nav className="sidebar-nav">
@@ -105,7 +139,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
           display: flex;
           align-items: center;
           gap: 12px;
-          margin-bottom: 40px;
+          margin-bottom: 24px;
+        }
+
+        .role-sidebar-card {
+          background-color: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-md);
+          padding: 10px 14px;
+          margin-bottom: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .role-card-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .role-switch-btn {
+          background-color: var(--bg-card-hover);
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          color: var(--text-secondary);
+          font-size: 0.7rem;
+          padding: 4px 8px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all var(--transition-fast);
+        }
+
+        .role-switch-btn:hover {
+          color: var(--text-primary);
+          border-color: var(--border-color-hover);
+          background-color: var(--bg-active);
         }
 
         .brand-logo {

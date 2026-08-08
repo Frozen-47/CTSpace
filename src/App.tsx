@@ -23,6 +23,11 @@ function App() {
   const [students, setStudents] = useState<Student[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
 
+  // Role-Wise Dashboard State
+  const [currentRole, setCurrentRole] = useState<'admin' | 'faculty' | 'student'>('admin');
+  const [selectedInstructorId, setSelectedInstructorId] = useState<string>('');
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+
   // UI Modal State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalType, setModalType] = useState<'course' | 'instructor' | 'class' | 'student' | 'enrollment'>('course');
@@ -57,6 +62,13 @@ function App() {
       setInstructors(fetchedInstructors);
       setStudents(fetchedStudents);
       setEnrollments(fetchedEnrollments);
+
+      if (fetchedInstructors.length > 0 && !selectedInstructorId) {
+        setSelectedInstructorId(fetchedInstructors[0].id);
+      }
+      if (fetchedStudents.length > 0 && !selectedStudentId) {
+        setSelectedStudentId(fetchedStudents[0].id);
+      }
     } catch (err: any) {
       showToast('error', `Failed to load database: ${err.message || err}`);
     }
@@ -164,6 +176,8 @@ function App() {
         theme={theme}
         setTheme={setTheme}
         useSupabase={useSupabase}
+        currentRole={currentRole}
+        setCurrentRole={setCurrentRole}
       />
 
       {/* Main View Area */}
@@ -176,6 +190,16 @@ function App() {
             students={students}
             enrollments={enrollments}
             setActiveTab={setActiveTab}
+            currentRole={currentRole}
+            setCurrentRole={setCurrentRole}
+            selectedInstructorId={selectedInstructorId}
+            setSelectedInstructorId={setSelectedInstructorId}
+            selectedStudentId={selectedStudentId}
+            setSelectedStudentId={setSelectedStudentId}
+            onAddCourse={() => handleAddClick('course')}
+            onAddClass={() => handleAddClick('class')}
+            onAddStudent={() => handleAddClick('student')}
+            onAddInstructor={() => handleAddClick('instructor')}
           />
         )}
 
