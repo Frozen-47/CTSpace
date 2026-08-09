@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ClassModal } from './components/ClassModal';
+import { ProtectionGuard } from './components/ProtectionGuard';
 import { Dashboard } from './views/Dashboard';
 import { Courses } from './views/Courses';
 import { Schedule } from './views/Schedule';
@@ -11,6 +12,9 @@ import { SUPABASE_CONFIG } from './config/supabase';
 import type { Course, Instructor, ClassInstance, Student, Enrollment } from './mock/mockData';
 
 function App() {
+  // Protection Layer State (Hard locked for live build phase)
+  const [isProtected] = useState<boolean>(true);
+
   // Navigation & Theme State
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -168,17 +172,21 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-200">
-      {/* Sidebar Navigation */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        theme={theme}
-        setTheme={setTheme}
-        useSupabase={useSupabase}
-        currentRole={currentRole}
-        setCurrentRole={setCurrentRole}
-      />
+    <div className="flex flex-col min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-200">
+      {/* Strict Protection Screen for Active Build Phase */}
+      <ProtectionGuard isProtected={isProtected} />
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Navigation */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          theme={theme}
+          setTheme={setTheme}
+          useSupabase={useSupabase}
+          currentRole={currentRole}
+          setCurrentRole={setCurrentRole}
+        />
 
       {/* Main View Area */}
       <main className="flex-1 p-6 md:p-10 max-w-[1300px] mx-auto w-full overflow-y-auto h-screen">
@@ -276,6 +284,7 @@ function App() {
           <span>{statusMessage.text}</span>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -275,6 +275,7 @@ export const Directory: React.FC<DirectoryProps> = ({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
+                            {student.sNo && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">S.No #{student.sNo}</span>}
                             <h3 className="font-bold text-sm text-[var(--text-primary)]">{student.name}</h3>
                             {student.rollNo && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">{student.rollNo}</span>}
                           </div>
@@ -377,6 +378,10 @@ export const Directory: React.FC<DirectoryProps> = ({
 
                         {/* Student Marks & Personal Details Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 bg-[var(--bg-card)] p-3 rounded-lg border border-[var(--border-color)]">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><FileText size={11} /> S.No</span>
+                            <span className="text-xs font-semibold text-amber-400 truncate">#{student.sNo || 'N/A'}</span>
+                          </div>
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><FileText size={11} /> Roll Number</span>
                             <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.rollNo || 'N/A'}</span>

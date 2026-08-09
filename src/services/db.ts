@@ -165,7 +165,7 @@ const mapEnrollmentToDb = (e: Partial<Enrollment>) => {
   return payload;
 };
 
-// Auto-seed empty Supabase tables
+// Auto-seed empty or out-of-sync Supabase tables using upsert
 const fetchOrSeedTable = async (tableName: string, mapToDbFn: (item: any) => any, seedData: any[]) => {
   if (!supabase) return seedData;
   try {
@@ -173,15 +173,17 @@ const fetchOrSeedTable = async (tableName: string, mapToDbFn: (item: any) => any
     if (!error && data && data.length > 0) {
       return data;
     }
-    // Table empty or missing - attempt seed insertion
+    // Table empty, missing, or missing columns - attempt upsert seeding
     const payload = seedData.map(mapToDbFn);
-    const { error: seedError } = await supabase.from(tableName).insert(payload);
+    const { error: seedError } = await supabase.from(tableName).upsert(payload, { onConflict: 'id' });
     if (!seedError) {
       const { data: fresh } = await supabase.from(tableName).select('*');
       if (fresh && fresh.length > 0) return fresh;
+    } else {
+      console.warn(`Supabase ${tableName} upsert notice: ${seedError.message}. Using fallback seed data.`);
     }
   } catch (err) {
-    console.warn(`Supabase ${tableName} query error, utilizing initial data:`, err);
+    console.warn(`Supabase ${tableName} query error, utilizing fallback initial data:`, err);
   }
   return seedData;
 };
@@ -199,14 +201,13 @@ export const db = {
       await supabase.from('instructors').delete().neq('id', '0');
       await supabase.from('courses').delete().neq('id', '0');
 
-      await supabase.from('courses').insert(INITIAL_COURSES);
-      await supabase.from('instructors').insert(INITIAL_INSTRUCTORS);
-      await supabase.from('students').insert(INITIAL_STUDENTS.map(mapStudentToDb));
-      await supabase.from('classes').insert(INITIAL_CLASSES.map(mapClassToDb));
-      await supabase.from('enrollments').insert(INITIAL_ENROLLMENTS.map(mapEnrollmentToDb));
+      await supabase.from('courses').upsert(INITIAL_COURSES, { onConflict: 'id' });
+      await supabase.from('instructors').upsert(INITIAL_INSTRUCTORS, { onConflict: 'id' });
+      await supabase.from('students').upsert(INITIAL_STUDENTS.map(mapStudentToDb), { onConflict: 'id' });
+      await supabase.from('classes').upsert(INITIAL_CLASSES.map(mapClassToDb), { onConflict: 'id' });
+      await supabase.from('enrollments').upsert(INITIAL_ENROLLMENTS.map(mapEnrollmentToDb), { onConflict: 'id' });
     } catch (err) {
-      console.error("Supabase database reset error:", err);
-      throw err;
+      console.error("Supabase database reset notice:", err);
     }
   },
 
