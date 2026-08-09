@@ -12,13 +12,33 @@ import { SUPABASE_CONFIG } from './config/supabase';
 import type { Course, Instructor, ClassInstance, Student, Enrollment } from './mock/mockData';
 
 function App() {
-  // Protection Layer State (Locked by default, unlocked via console unlock(6369611) or sessionStorage)
+  // Protection Layer State (Auto-removed after 5 refreshes, console unlock(6369611), or sessionStorage)
   const [isProtected, setIsProtected] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('ctspace_unlocked') !== 'true';
+      const refreshCount = parseInt(localStorage.getItem('ctspace_refresh_count') || '0', 10);
+      const isUnlocked = sessionStorage.getItem('ctspace_unlocked') === 'true';
+      if (refreshCount >= 4 || isUnlocked) {
+        return false;
+      }
     }
     return true;
   });
+
+  // Track page refreshes and auto-remove protection after 5 refreshes
+  useEffect(() => {
+    try {
+      const currentCount = parseInt(localStorage.getItem('ctspace_refresh_count') || '0', 10) + 1;
+      localStorage.setItem('ctspace_refresh_count', currentCount.toString());
+
+      if (currentCount >= 5) {
+        setIsProtected(false);
+        sessionStorage.setItem('ctspace_unlocked', 'true');
+        console.log(`%c[CTSpace] 5 refreshes completed (${currentCount}). Protection layer automatically removed.`, 'color: #10b981; font-weight: bold; font-size: 13px;');
+      }
+    } catch {
+      // Storage access safety
+    }
+  }, []);
 
   // Console input handler for code 6369611
   useEffect(() => {
