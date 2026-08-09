@@ -116,17 +116,34 @@ export function checkSchedulingConflict(
 
 const mapStudentFromDb = (row: any): Student => ({
   id: row.id,
+  sNo: row.s_no ?? row.sNo,
+  rollNo: row.roll_no || row.rollNo,
   name: row.name,
   email: row.email,
-  classGroup: row.class_group || row.classGroup
+  classGroup: row.class_group || row.classGroup,
+  mark10: row.mark_10 || row.mark10,
+  mark11: row.mark_11 || row.mark11,
+  mark12: row.mark_12 || row.mark12,
+  group: row.group,
+  medium: row.medium,
+  bloodGroup: row.blood_group || row.bloodGroup,
+  dob: row.dob,
+  phone: row.phone,
+  linkedin: row.linkedin,
+  github: row.github,
+  projectDrive: row.project_drive || row.projectDrive
 });
 
 const mapStudentToDb = (s: Partial<Student>) => {
   const payload: any = { ...s };
-  if (payload.classGroup !== undefined) {
-    payload.class_group = payload.classGroup;
-    delete payload.classGroup;
-  }
+  if (payload.sNo !== undefined) { payload.s_no = payload.sNo; delete payload.sNo; }
+  if (payload.rollNo !== undefined) { payload.roll_no = payload.rollNo; delete payload.rollNo; }
+  if (payload.classGroup !== undefined) { payload.class_group = payload.classGroup; delete payload.classGroup; }
+  if (payload.mark10 !== undefined) { payload.mark_10 = payload.mark10; delete payload.mark10; }
+  if (payload.mark11 !== undefined) { payload.mark_11 = payload.mark11; delete payload.mark11; }
+  if (payload.mark12 !== undefined) { payload.mark_12 = payload.mark12; delete payload.mark12; }
+  if (payload.bloodGroup !== undefined) { payload.blood_group = payload.bloodGroup; delete payload.bloodGroup; }
+  if (payload.projectDrive !== undefined) { payload.project_drive = payload.projectDrive; delete payload.projectDrive; }
   return payload;
 };
 
@@ -319,7 +336,13 @@ export const db = {
       if (error) throw error;
       return (data || []).map(mapStudentFromDb);
     }
-    return getLocal<Student>('students', INITIAL_STUDENTS).sort((a, b) => a.name.localeCompare(b.name));
+    const local = getLocal<Student>('students', INITIAL_STUDENTS);
+    // If local storage has fewer than 34 students or old schema without github/rollNo, update it to initial seeds
+    if (!local || local.length < 34 || !local.some(s => s.github)) {
+      setLocal('students', INITIAL_STUDENTS);
+      return INITIAL_STUDENTS;
+    }
+    return local;
   },
 
   saveStudent: async (student: Omit<Student, 'id'> & { id?: string }): Promise<Student> => {

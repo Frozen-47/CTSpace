@@ -139,430 +139,174 @@ CREATE POLICY "Public Read/Write Enrollments" ON enrollments FOR ALL USING (true
   };
 
   return (
-    <div className="admin-panel-view animate-fade-in">
-      <header className="view-header">
-        <div>
-          <h1>Administration</h1>
-          <p className="subtitle">Database engines, migration setup, and local state management tools.</p>
-        </div>
+    <div className="flex flex-col gap-6 animate-fade-in pb-12">
+      <header className="mb-2">
+        <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Administration</h1>
+        <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Database engines, migration setup, and local state management tools.</p>
       </header>
 
-      {/* 100% Free Database Banner */}
-      <section className="admin-section card free-db-banner">
-        <div className="admin-section-header">
-          <ShieldCheck size={22} className="text-success" />
+      {/* Free Database Banner */}
+      <section className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 shadow-sm">
+        <div className="flex items-start gap-3 mb-4">
+          <ShieldCheck size={22} className="text-emerald-400 shrink-0 mt-0.5" />
           <div>
-            <h2>100% Free Built-in Local Database</h2>
-            <p>CTSpace comes with a 100% free, zero-cost, serverless database engine built directly into your browser.</p>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">100% Free Built-in Local Database</h2>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">CTSpace comes with a 100% free, zero-cost, serverless database engine built directly into your browser.</p>
           </div>
         </div>
-        <div className="free-db-features">
-          <div className="free-feature-pill">
-            <HardDrive size={14} />
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-[var(--bg-card)] px-3 py-1.5 rounded-md border border-emerald-500/20">
+            <HardDrive size={13} />
             <span>Zero Subscription or Cloud Fees</span>
           </div>
-          <div className="free-feature-pill">
-            <Check size={14} />
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-[var(--bg-card)] px-3 py-1.5 rounded-md border border-emerald-500/20">
+            <Check size={13} />
             <span>Instant Client-Side Persistence</span>
           </div>
-          <div className="free-feature-pill">
-            <Download size={14} />
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-[var(--bg-card)] px-3 py-1.5 rounded-md border border-emerald-500/20">
+            <Download size={13} />
             <span>One-Click Backup Export & Import</span>
           </div>
         </div>
       </section>
 
-      <section className="admin-section card">
-        <div className="admin-section-header">
-          <Database size={18} className="section-icon" />
+      {/* Database Engine Selector */}
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <Database size={18} className="text-[var(--text-secondary)] mt-0.5" />
           <div>
-            <h2>Database Engine Selector</h2>
-            <p>Select your connection provider for CTSpace data storage.</p>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Database Engine Selector</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Select your connection provider for CTSpace data storage.</p>
           </div>
         </div>
 
-        <div className="engine-toggle-box">
-          <div className="engine-options">
-            <div className={`engine-option ${!useSupabase ? 'selected' : ''}`} onClick={() => onToggleSupabase(false)}>
-              <div className="option-indicator" />
-              <div>
-                <h3>Free Local Browser DB (Recommended)</h3>
-                <p>100% free forever. Stores data locally in your browser. Zero setup required.</p>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div 
+            className={`p-4 rounded-lg border transition cursor-pointer flex items-start gap-3 ${
+              !useSupabase 
+                ? 'bg-[var(--bg-active)] border-[var(--text-secondary)] shadow-sm' 
+                : 'bg-[var(--bg-card-hover)] border-[var(--border-color)] hover:border-[var(--border-color-hover)]'
+            }`} 
+            onClick={() => onToggleSupabase(false)}
+          >
+            <div className={`w-3.5 h-3.5 rounded-full border shrink-0 mt-1 flex items-center justify-center ${!useSupabase ? 'border-[var(--text-primary)]' : 'border-[var(--border-color)]'}`}>
+              {!useSupabase && <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />}
             </div>
-            
-            <div className={`engine-option ${useSupabase ? 'selected' : ''}`} onClick={() => onToggleSupabase(true)}>
-              <div className="option-indicator" />
-              <div>
-                <h3>Supabase Client (Free Cloud Tier)</h3>
-                <p>Connects to a remote PostgreSQL server. Requires free Supabase credentials.</p>
-              </div>
+            <div>
+              <h3 className="text-xs font-bold text-[var(--text-primary)]">Free Local Browser DB (Recommended)</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">100% free forever. Stores data locally in your browser. Zero setup required.</p>
+            </div>
+          </div>
+
+          <div 
+            className={`p-4 rounded-lg border transition cursor-pointer flex items-start gap-3 ${
+              useSupabase 
+                ? 'bg-[var(--bg-active)] border-[var(--text-secondary)] shadow-sm' 
+                : 'bg-[var(--bg-card-hover)] border-[var(--border-color)] hover:border-[var(--border-color-hover)]'
+            }`} 
+            onClick={() => onToggleSupabase(true)}
+          >
+            <div className={`w-3.5 h-3.5 rounded-full border shrink-0 mt-1 flex items-center justify-center ${useSupabase ? 'border-[var(--text-primary)]' : 'border-[var(--border-color)]'}`}>
+              {useSupabase && <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />}
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-[var(--text-primary)]">Supabase Client (Free Cloud Tier)</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">Connects to a remote PostgreSQL server. Requires free Supabase credentials.</p>
             </div>
           </div>
         </div>
 
         {useSupabase && (
-          <div className="supabase-warning-alert">
-            <AlertTriangle size={14} />
-            <span>Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are present in your environment variables.</span>
+          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 p-3 rounded-md text-xs text-amber-400">
+            <AlertTriangle size={14} className="shrink-0" />
+            <span>Make sure SUPABASE_URL and SUPABASE_ANON_KEY are present in your environment variables.</span>
           </div>
         )}
       </section>
 
       {/* Backup & Data Management */}
-      <section className="admin-section card">
-        <div className="admin-section-header">
-          <HardDrive size={18} className="section-icon" />
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <HardDrive size={18} className="text-[var(--text-secondary)] mt-0.5" />
           <div>
-            <h2>Free Backup & Data Management</h2>
-            <p>Export your full database to a JSON file or restore from a previous backup.</p>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Free Backup & Data Management</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Export your full database to a JSON file or restore from a previous backup.</p>
           </div>
         </div>
 
-        <div className="backup-actions-grid">
-          <div className="backup-card">
-            <h4>Export Database</h4>
-            <p>Download a complete `.json` snapshot of all courses, instructors, students, classes, and enrollments.</p>
-            <button className="btn btn-secondary" onClick={handleExportJSON}>
-              <Download size={14} /> Export JSON Snapshot
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] rounded-lg p-4 flex flex-col justify-between gap-3">
+            <div>
+              <h4 className="text-xs font-bold text-[var(--text-primary)]">Export Database</h4>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">Download a complete `.json` snapshot of all courses, instructors, students, classes, and enrollments.</p>
+            </div>
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card)] text-[var(--text-primary)] text-xs font-semibold transition cursor-pointer self-start" onClick={handleExportJSON}>
+              <Download size={13} /> Export JSON Snapshot
             </button>
           </div>
 
-          <div className="backup-card">
-            <h4>Import Database</h4>
-            <p>Restore database records from an exported `.json` snapshot file.</p>
-            <label className="btn btn-secondary file-upload-btn">
-              <Upload size={14} /> {importing ? 'Importing...' : 'Upload JSON File'}
-              <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
+          <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] rounded-lg p-4 flex flex-col justify-between gap-3">
+            <div>
+              <h4 className="text-xs font-bold text-[var(--text-primary)]">Import Database</h4>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">Restore database records from an exported `.json` snapshot file.</p>
+            </div>
+            <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card)] text-[var(--text-primary)] text-xs font-semibold transition cursor-pointer self-start">
+              <Upload size={13} /> {importing ? 'Importing...' : 'Upload JSON File'}
+              <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
             </label>
           </div>
         </div>
       </section>
 
-      <section className="admin-section card">
-        <div className="admin-section-header">
-          <RefreshCw size={18} className="section-icon" />
+      {/* Factory Reset */}
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <RefreshCw size={18} className="text-[var(--text-secondary)] mt-0.5" />
           <div>
-            <h2>Factory Data Reset</h2>
-            <p>Restore original seed dataset.</p>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Factory Data Reset</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Restore original seed dataset.</p>
           </div>
         </div>
 
-        <div className="reset-action-box">
-          <p className="description-text">Erase local workspace modifications and restore curriculum and roster initial default values.</p>
-          <button className="btn btn-danger" onClick={handleReset} disabled={resetting || useSupabase}>
+        <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed flex-1">Erase local workspace modifications and restore curriculum and roster initial default values.</p>
+          <button className="px-4 py-2 rounded-md border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer shrink-0" onClick={handleReset} disabled={resetting || useSupabase}>
             {resetting ? 'Resetting...' : 'Reset to Default Seeds'}
           </button>
         </div>
       </section>
 
-      <section className="admin-section card">
-        <div className="admin-section-header">
-          <Database size={18} className="section-icon" />
+      {/* DDL Script */}
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <Database size={18} className="text-[var(--text-secondary)] mt-0.5" />
           <div>
-            <h2>DDL Migrations</h2>
-            <p>Run these DDL commands in your Supabase SQL Editor to initialize matching tables.</p>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">DDL Migrations</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Run these DDL commands in your Supabase SQL Editor to initialize matching tables.</p>
           </div>
         </div>
 
-        <div className="sql-script-wrapper">
-          <div className="sql-header">
-            <span>schema.sql</span>
-            <button className="btn btn-secondary btn-sm" onClick={copyToClipboard}>
-              {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+        <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-3.5 py-2 border-b border-[var(--border-color)] bg-[var(--bg-card)]">
+            <span className="text-xs font-mono text-[var(--text-secondary)]">schema.sql</span>
+            <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-xs font-semibold transition cursor-pointer" onClick={copyToClipboard}>
+              {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
-          <pre className="sql-code-block">
+          <pre className="p-3.5 max-h-48 overflow-y-auto font-mono text-xs text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
             <code>{sqlMigration}</code>
           </pre>
         </div>
       </section>
 
       {statusMessage && (
-        <div className={`status-toast ${statusMessage.type}`}>
+        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-xl border text-xs font-semibold flex items-center gap-2 animate-fade-in ${
+          statusMessage.type === 'success' ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/90 border-rose-500/40 text-rose-300'
+        }`}>
           <span>{statusMessage.text}</span>
         </div>
       )}
-
-      <style>{`
-        .admin-panel-view {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .view-header {
-          margin-bottom: 8px;
-        }
-
-        .view-header h1 {
-          font-size: 1.6rem;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          color: var(--text-primary);
-        }
-
-        .free-db-banner {
-          background-color: var(--success-bg);
-          border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .free-db-features {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          margin-top: 8px;
-        }
-
-        .free-feature-pill {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          color: var(--success);
-          background-color: var(--bg-card);
-          padding: 6px 12px;
-          border-radius: var(--radius-sm);
-          border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .backup-actions-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
-        }
-
-        @media (max-width: 600px) {
-          .backup-actions-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .backup-card {
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          padding: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .backup-card h4 {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .backup-card p {
-          font-size: 0.78rem;
-          color: var(--text-secondary);
-          line-height: 1.3;
-          flex: 1;
-        }
-
-        .file-upload-btn {
-          display: inline-flex;
-          cursor: pointer;
-        }
-
-        .admin-section {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          padding: 18px;
-        }
-
-        .admin-section-header {
-          display: flex;
-          gap: 12px;
-          align-items: flex-start;
-        }
-
-        .section-icon {
-          color: var(--text-secondary);
-          margin-top: 2px;
-        }
-
-        .admin-section-header h2 {
-          font-size: 0.95rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .admin-section-header p {
-          font-size: 0.78rem;
-          color: var(--text-muted);
-          margin-top: 2px;
-        }
-
-        .engine-options {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-
-        @media (max-width: 600px) {
-          .engine-options {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .engine-option {
-          display: flex;
-          gap: 10px;
-          padding: 14px;
-          border-radius: var(--radius-sm);
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          cursor: pointer;
-          transition: all var(--transition-fast);
-        }
-
-        .engine-option:hover {
-          border-color: var(--border-color-hover);
-        }
-
-        .engine-option.selected {
-          border-color: var(--text-secondary);
-          background-color: var(--bg-active);
-        }
-
-        .option-indicator {
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          border: 1px solid var(--border-color);
-          flex-shrink: 0;
-          margin-top: 2px;
-          position: relative;
-        }
-
-        .engine-option.selected .option-indicator {
-          border-color: var(--text-secondary);
-        }
-
-        .engine-option.selected .option-indicator::after {
-          content: '';
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          background-color: var(--text-primary);
-          border-radius: 50%;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-        }
-
-        .engine-option h3 {
-          font-size: 0.85rem;
-          color: var(--text-primary);
-          font-weight: 600;
-        }
-
-        .engine-option p {
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-          margin-top: 2px;
-          line-height: 1.3;
-        }
-
-        .supabase-warning-alert {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          background-color: var(--warning-bg);
-          border: 1px solid rgba(245, 158, 11, 0.1);
-          color: var(--warning);
-          padding: 10px 14px;
-          border-radius: var(--radius-sm);
-          font-size: 0.75rem;
-          line-height: 1.3;
-        }
-
-        .reset-action-box {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          padding: 12px 16px;
-          border-radius: var(--radius-sm);
-          gap: 16px;
-        }
-
-        @media (max-width: 600px) {
-          .reset-action-box {
-            flex-direction: column;
-            align-items: stretch;
-          }
-        }
-
-        .description-text {
-          font-size: 0.78rem;
-          color: var(--text-secondary);
-          line-height: 1.3;
-          flex: 1;
-        }
-
-        .sql-script-wrapper {
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          overflow: hidden;
-        }
-
-        .sql-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 8px 12px;
-          border-bottom: 1px solid var(--border-color);
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-          font-weight: 600;
-        }
-
-        .sql-code-block {
-          padding: 12px;
-          max-height: 180px;
-          overflow-y: auto;
-          font-family: monospace;
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-          line-height: 1.4;
-          text-align: left;
-          white-space: pre-wrap;
-        }
-
-        .text-success {
-          color: var(--success);
-        }
-
-        .status-toast {
-          position: fixed;
-          bottom: 24px;
-          right: 24px;
-          padding: 12px 20px;
-          border-radius: var(--radius-sm);
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: white;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-          z-index: 2000;
-          animation: slideIn 0.2s ease forwards;
-        }
-
-        .status-toast.success { background-color: var(--success); }
-        .status-toast.error { background-color: var(--danger); }
-
-        @keyframes slideIn {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };

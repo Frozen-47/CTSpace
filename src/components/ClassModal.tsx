@@ -156,44 +156,44 @@ export const ClassModal: React.FC<ClassModalProps> = ({
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content glass animate-fade-in">
-        <div className="modal-header">
-          <h2>{titlePrefix} {displayNames[type]}</h2>
-          <button className="modal-close" onClick={onClose} disabled={loading}>
-            <X size={20} />
+    <div className="fixed inset-0 bg-black/65 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="w-full max-w-xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl flex flex-col max-h-[90vh] shadow-2xl overflow-hidden animate-fade-in">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)]">
+          <h2 className="font-bold text-lg text-[var(--text-primary)]">{titlePrefix} {displayNames[type]}</h2>
+          <button className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] p-1.5 rounded-md transition cursor-pointer" onClick={onClose} disabled={loading}>
+            <X size={18} />
           </button>
         </div>
 
         {error && (
-          <div className="modal-error">
+          <div className="bg-rose-500/10 border-l-4 border-rose-500 p-3.5 mx-6 mt-4 rounded text-sm text-[var(--text-primary)]">
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
           {/* COURSE FORM */}
           {type === 'course' && (
             <>
-              <div className="form-row">
-                <div className="form-group flex-1">
-                  <label className="form-label">Course Code</label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Course Code</label>
                   <input
                     type="text"
                     name="code"
-                    className="form-input"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     placeholder="e.g., CS-101"
                     value={formData.code || ''}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div className="form-group flex-1">
-                  <label className="form-label">Credits</label>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Credits</label>
                   <input
                     type="number"
                     name="credits"
-                    className="form-input"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     min="1"
                     max="6"
                     value={formData.credits || 3}
@@ -202,26 +202,27 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                   />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Course Title</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Course Title</label>
                 <input
                   type="text"
                   name="name"
-                  className="form-input"
-                  placeholder="e.g., Introduction to Computer Science"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                  placeholder="e.g., Data Structures and Algorithms"
                   value={formData.name || ''}
                   onChange={handleInputChange}
                   required
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Description</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Course Description</label>
                 <textarea
                   name="description"
-                  className="form-textarea"
-                  placeholder="Provide a brief course description..."
+                  className="w-full min-h-[90px] resize-y px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                  placeholder="Detailed course overview and learning objectives..."
                   value={formData.description || ''}
                   onChange={handleInputChange}
+                  rows={3}
                 />
               </div>
             </>
@@ -230,36 +231,36 @@ export const ClassModal: React.FC<ClassModalProps> = ({
           {/* INSTRUCTOR FORM */}
           {type === 'instructor' && (
             <>
-              <div className="form-group">
-                <label className="form-label">Full Name</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Full Name</label>
                 <input
                   type="text"
                   name="name"
-                  className="form-input"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   placeholder="e.g., Dr. Evelyn Wright"
                   value={formData.name || ''}
                   onChange={handleInputChange}
                   required
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Email Address</label>
                 <input
                   type="email"
                   name="email"
-                  className="form-input"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   placeholder="e.g., e.wright@university.edu"
                   value={formData.email || ''}
                   onChange={handleInputChange}
                   required
                 />
               </div>
-              <div className="form-row">
-                <div className="form-group flex-1">
-                  <label className="form-label">Academic Title</label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Academic Title</label>
                   <select
                     name="title"
-                    className="form-select"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     value={formData.title || 'Assistant Professor'}
                     onChange={handleInputChange}
                   >
@@ -271,24 +272,24 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                     <option value="Adjunct Professor">Adjunct Professor</option>
                   </select>
                 </div>
-                <div className="form-group flex-1">
-                  <label className="form-label">Office Location</label>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Office Location</label>
                   <input
                     type="text"
                     name="office"
-                    className="form-input"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     placeholder="e.g., Tech Hall 402"
                     value={formData.office || ''}
                     onChange={handleInputChange}
                   />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Area of Specialization</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Area of Specialization</label>
                 <input
                   type="text"
                   name="specialization"
-                  className="form-input"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   placeholder="e.g., Artificial Intelligence & Computer Vision"
                   value={formData.specialization || ''}
                   onChange={handleInputChange}
@@ -300,11 +301,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
           {/* CLASS FORM */}
           {type === 'class' && (
             <>
-              <div className="form-group">
-                <label className="form-label">Select Course</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Select Course</label>
                 <select
                   name="courseId"
-                  className="form-select"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   value={formData.courseId || ''}
                   onChange={handleInputChange}
                   required
@@ -315,11 +316,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Assign Instructor</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Assign Instructor</label>
                 <select
                   name="instructorId"
-                  className="form-select"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   value={formData.instructorId || ''}
                   onChange={handleInputChange}
                   required
@@ -330,27 +331,27 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </select>
               </div>
 
-              <div className="form-row">
-                <div className="form-group flex-1">
-                  <label className="form-label">Room / Classroom</label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Room / Classroom</label>
                   <input
                     type="text"
                     name="room"
-                    className="form-input"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     placeholder="e.g., Tech Hall 101"
                     value={formData.room || ''}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div className="form-group flex-1">
-                  <label className="form-label">Class Capacity</label>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Class Capacity</label>
                   <input
                     type="number"
                     name="capacity"
-                    className="form-input"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     min="5"
-                    max="100"
+                    max="200"
                     value={formData.capacity || 30}
                     onChange={handleInputChange}
                     required
@@ -358,25 +359,25 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group flex-1">
-                  <label className="form-label">Term</label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Academic Term</label>
                   <input
                     type="text"
                     name="term"
-                    className="form-input"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                     placeholder="e.g., Fall 2026"
                     value={formData.term || 'Fall 2026'}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div className="form-group flex-1">
-                  <label className="form-label">Time Slot</label>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Time Slot</label>
                   <select
                     name="scheduleTime"
-                    className="form-select"
-                    value={formData.scheduleTime || '09:00 AM - 10:30 AM'}
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    value={formData.scheduleTime || timeslots[0]}
                     onChange={handleInputChange}
                   >
                     {timeslots.map(t => (
@@ -386,11 +387,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Class Group (Cohort)</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Class Group (Cohort)</label>
                 <select
                   name="classGroup"
-                  className="form-select"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   value={formData.classGroup || CLASS_GROUPS[0]}
                   onChange={handleInputChange}
                   required
@@ -401,9 +402,9 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Days of Week</label>
-                <div className="days-checkbox-grid">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Days of Week</label>
+                <div className="grid grid-cols-5 gap-2 mt-1">
                   {daysOfWeek.map(day => {
                     const isChecked = (formData.scheduleDays || []).includes(day);
                     return (
@@ -411,7 +412,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                         type="button"
                         key={day}
                         onClick={() => handleDayToggle(day)}
-                        className={`day-btn ${isChecked ? 'selected' : ''}`}
+                        className={`p-2 rounded-md border text-xs font-bold transition cursor-pointer ${
+                          isChecked 
+                            ? 'bg-[var(--text-primary)] text-[var(--bg-app)] border-[var(--text-primary)] shadow-sm' 
+                            : 'bg-[var(--bg-input)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-color-hover)]'
+                        }`}
                       >
                         {day.substring(0, 3)}
                       </button>
@@ -425,43 +430,183 @@ export const ClassModal: React.FC<ClassModalProps> = ({
           {/* STUDENT FORM */}
           {type === 'student' && (
             <>
-              <div className="form-group">
-                <label className="form-label">Full Name</label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., Akash V"
+                    value={formData.name || ''}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Roll Number</label>
+                  <input
+                    type="text"
+                    name="rollNo"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., 22CT24038"
+                    value={formData.rollNo || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., akash.v@student.edu"
+                    value={formData.email || ''}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Phone Number</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., 9629346096"
+                    value={formData.phone || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">GitHub URL</label>
+                  <input
+                    type="text"
+                    name="github"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., https://github.com/username"
+                    value={formData.github || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">LinkedIn URL</label>
+                  <input
+                    type="text"
+                    name="linkedin"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., https://linkedin.com/in/username"
+                    value={formData.linkedin || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Class Group (Cohort)</label>
+                  <select
+                    name="classGroup"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    value={formData.classGroup || CLASS_GROUPS[0]}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    {CLASS_GROUPS.map(cg => (
+                      <option key={cg} value={cg}>{cg}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Blood Group</label>
+                  <input
+                    type="text"
+                    name="bloodGroup"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., B+VE"
+                    value={formData.bloodGroup || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Medium</label>
+                  <select
+                    name="medium"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    value={formData.medium || 'English'}
+                    onChange={handleInputChange}
+                  >
+                    <option value="English">English</option>
+                    <option value="Tamil">Tamil</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Date of Birth</label>
+                  <input
+                    type="text"
+                    name="dob"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., 12.11.2007"
+                    value={formData.dob || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Subject Group</label>
                 <input
                   type="text"
-                  name="name"
-                  className="form-input"
-                  placeholder="e.g., Alice Smith"
-                  value={formData.name || ''}
+                  name="group"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                  placeholder="e.g., maths, computer science"
+                  value={formData.group || ''}
                   onChange={handleInputChange}
-                  required
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <input
-                  type="email"
-                  name="email"
-                  className="form-input"
-                  placeholder="e.g., a.smith@student.edu"
-                  value={formData.email || ''}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Class Group (Cohort)</label>
-                <select
-                  name="classGroup"
-                  className="form-select"
-                  value={formData.classGroup || CLASS_GROUPS[0]}
-                  onChange={handleInputChange}
-                  required
-                >
-                  {CLASS_GROUPS.map(cg => (
-                    <option key={cg} value={cg}>{cg}</option>
-                  ))}
-                </select>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">10th Mark (%)</label>
+                  <input
+                    type="text"
+                    name="mark10"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., 59%"
+                    value={formData.mark10 || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">11th Mark (%)</label>
+                  <input
+                    type="text"
+                    name="mark11"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., 64%"
+                    value={formData.mark11 || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">12th Mark (%)</label>
+                  <input
+                    type="text"
+                    name="mark12"
+                    className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
+                    placeholder="e.g., 72%"
+                    value={formData.mark12 || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
             </>
           )}
@@ -469,15 +614,15 @@ export const ClassModal: React.FC<ClassModalProps> = ({
           {/* ENROLLMENT FORM */}
           {type === 'enrollment' && (
             <>
-              <div className="form-group">
-                <label className="form-label">Student</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Student</label>
                 <select
                   name="studentId"
-                  className="form-select"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   value={formData.studentId || ''}
                   onChange={handleInputChange}
                   required
-                  disabled={!!initialData} // Lock student choice during edit
+                  disabled={!!initialData}
                 >
                   {students.map(s => (
                     <option key={s.id} value={s.id}>{s.name} ({s.classGroup})</option>
@@ -485,32 +630,31 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Class</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Class</label>
                 <select
                   name="classId"
-                  className="form-select"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   value={formData.classId || ''}
                   onChange={handleInputChange}
                   required
-                  disabled={!!initialData} // Lock class choice during edit
                 >
-                  {classes.map(c => {
-                    const course = courses.find(co => co.id === c.courseId);
+                  {classes.map(cls => {
+                    const course = courses.find(c => c.id === cls.courseId);
                     return (
-                      <option key={c.id} value={c.id}>
-                        {course?.code || 'Class'} (Room {c.room}) - {c.scheduleTime}
+                      <option key={cls.id} value={cls.id}>
+                        {course?.code || 'CS-???'} - Room {cls.room} ({cls.scheduleDays.join('/')}) [{cls.classGroup}]
                       </option>
                     );
                   })}
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Grade</label>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Grade</label>
                 <select
                   name="grade"
-                  className="form-select"
+                  className="w-full px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-sm outline-none focus:border-[var(--text-secondary)] focus:ring-2 focus:ring-[var(--primary-glow)] transition"
                   value={formData.grade || 'IP'}
                   onChange={handleInputChange}
                 >
@@ -529,10 +673,10 @@ export const ClassModal: React.FC<ClassModalProps> = ({
             </>
           )}
 
-          <div className="modal-actions">
+          <div className="flex items-center justify-end gap-3 pt-5 mt-6 border-t border-[var(--border-color)]">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="px-4 py-2 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-color-hover)] text-[var(--text-primary)] text-xs font-semibold transition cursor-pointer"
               onClick={onClose}
               disabled={loading}
             >
@@ -540,12 +684,12 @@ export const ClassModal: React.FC<ClassModalProps> = ({
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="px-4 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer flex items-center gap-2"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <Loader size={16} className="animate-spin" />
+                  <Loader size={15} className="animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -555,136 +699,6 @@ export const ClassModal: React.FC<ClassModalProps> = ({
           </div>
         </form>
       </div>
-
-      <style>{`
-        .modal-backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background-color: rgba(0, 0, 0, 0.6);
-          backdrop-filter: blur(4px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          padding: 20px;
-        }
-
-        .modal-content {
-          width: 100%;
-          max-width: 580px;
-          border-radius: var(--radius-lg);
-          border: 1px solid var(--border-color);
-          display: flex;
-          flex-direction: column;
-          max-height: 90vh;
-          box-shadow: var(--shadow-lg);
-          overflow: hidden;
-        }
-
-        .modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px 24px;
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-header h2 {
-          font-family: var(--font-display);
-          font-size: 1.25rem;
-          color: var(--text-primary);
-        }
-
-        .modal-close {
-          background: transparent;
-          border: none;
-          color: var(--text-secondary);
-          cursor: pointer;
-          padding: 4px;
-          border-radius: var(--radius-sm);
-          transition: all var(--transition-fast);
-        }
-
-        .modal-close:hover {
-          color: var(--text-primary);
-          background-color: var(--bg-card-hover);
-        }
-
-        .modal-error {
-          background-color: var(--danger-bg);
-          border-left: 4px solid var(--danger);
-          padding: 12px 18px;
-          margin: 16px 24px 0;
-          border-radius: var(--radius-sm);
-          font-size: 0.875rem;
-          color: var(--text-primary);
-        }
-
-        .modal-form {
-          padding: 24px;
-          overflow-y: auto;
-          flex: 1;
-        }
-
-        .form-row {
-          display: flex;
-          gap: 16px;
-        }
-
-        .flex-1 {
-          flex: 1;
-        }
-
-        .days-checkbox-grid {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 8px;
-          margin-top: 8px;
-        }
-
-        .day-btn {
-          padding: 10px;
-          border-radius: var(--radius-md);
-          border: 1px solid var(--border-color);
-          background-color: var(--bg-input);
-          color: var(--text-secondary);
-          font-weight: 600;
-          cursor: pointer;
-          font-family: var(--font-display);
-          transition: all var(--transition-fast);
-        }
-
-        .day-btn:hover {
-          border-color: var(--border-color-hover);
-          color: var(--text-primary);
-        }
-
-        .day-btn.selected {
-          background-color: var(--primary);
-          color: white;
-          border-color: var(--primary);
-          box-shadow: var(--shadow-accent);
-        }
-
-        .modal-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          margin-top: 30px;
-          border-top: 1px solid var(--border-color);
-          padding-top: 20px;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };

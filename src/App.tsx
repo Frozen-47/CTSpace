@@ -168,7 +168,7 @@ function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className="flex min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-200">
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
@@ -181,7 +181,7 @@ function App() {
       />
 
       {/* Main View Area */}
-      <main className="main-content">
+      <main className="flex-1 p-6 md:p-10 max-w-[1300px] mx-auto w-full overflow-y-auto h-screen">
         {activeTab === 'dashboard' && (
           <Dashboard
             courses={courses}
@@ -268,7 +268,11 @@ function App() {
 
       {/* Global Status Notice (Toasts) */}
       {statusMessage && activeTab !== 'admin' && (
-        <div className={`status-toast ${statusMessage.type}`}>
+        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-xl border text-xs font-semibold flex items-center gap-2 animate-fade-in ${
+          statusMessage.type === 'success' 
+            ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-300' 
+            : 'bg-rose-950/90 border-rose-500/40 text-rose-300'
+        }`}>
           <span>{statusMessage.text}</span>
         </div>
       )}

@@ -37,32 +37,32 @@ export const Courses: React.FC<CoursesProps> = ({
   });
 
   return (
-    <div className="courses-view animate-fade-in">
-      <header className="view-header">
+    <div className="flex flex-col gap-6 animate-fade-in pb-12">
+      <header className="flex items-center justify-between mb-2">
         <div>
-          <h1>Curriculum</h1>
-          <p className="subtitle">Course catalog listings and syllabus details.</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Curriculum</h1>
+          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Course catalog listings and syllabus details.</p>
         </div>
-        <button className="btn btn-primary" onClick={onAddCourse}>
-          <Plus size={16} />
+        <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer shadow-sm" onClick={onAddCourse}>
+          <Plus size={15} />
           New Course
         </button>
       </header>
 
-      <section className="search-filter-bar card">
-        <div className="search-input-wrapper">
-          <Search size={14} className="search-icon" />
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="relative flex-1 w-full sm:w-80">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
             type="text"
-            className="form-input search-input"
+            className="w-full pl-9 pr-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs outline-none focus:border-[var(--text-secondary)] transition"
             placeholder="Search by code or title..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="filters-wrapper">
+        <div className="w-full sm:w-auto">
           <select
-            className="form-select filter-select"
+            className="w-full sm:w-48 px-3.5 py-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs font-medium outline-none focus:border-[var(--text-secondary)] transition"
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
           >
@@ -75,29 +75,31 @@ export const Courses: React.FC<CoursesProps> = ({
         </div>
       </section>
 
-      <section className="courses-grid">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCourses.length > 0 ? (
           filteredCourses.map(course => (
-            <div key={course.id} className="course-card card">
-              <div className="course-card-header">
-                <span className="course-code">{course.code}</span>
-                <span className="badge badge-info">
-                  {course.credits} Credits
-                </span>
+            <div key={course.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 flex flex-col justify-between transition shadow-sm gap-3">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-extrabold text-[var(--text-primary)]">{course.code}</span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    {course.credits} Credits
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1.5">{course.name}</h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{course.description}</p>
               </div>
-              <h3 className="course-title">{course.name}</h3>
-              <p className="course-description">{course.description}</p>
-              
-              <div className="course-actions">
+
+              <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-color)] mt-4">
                 <button 
-                  className="btn btn-secondary action-btn" 
+                  className="flex-1 py-1.5 px-3 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer" 
                   onClick={() => onEditCourse(course)}
                 >
                   <Edit size={12} />
                   Edit
                 </button>
                 <button 
-                  className="btn btn-danger action-btn" 
+                  className="py-1.5 px-3 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-rose-500/10 text-rose-400 border-rose-500/20 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer" 
                   onClick={() => onDeleteCourse(course.id)}
                 >
                   <Trash2 size={12} />
@@ -107,152 +109,13 @@ export const Courses: React.FC<CoursesProps> = ({
             </div>
           ))
         ) : (
-          <div className="empty-catalog card">
-            <BookOpen size={36} className="empty-icon" />
-            <h3>No courses found</h3>
-            <p>Try refining your search terms or filters.</p>
+          <div className="col-span-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-12 flex flex-col items-center justify-center text-center">
+            <BookOpen size={36} className="text-[var(--text-muted)] mb-3" />
+            <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">No courses found</h3>
+            <p className="text-xs text-[var(--text-secondary)]">Try refining your search terms or filters.</p>
           </div>
         )}
       </section>
-
-      <style>{`
-        .courses-view {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .view-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-
-        .view-header h1 {
-          font-size: 1.6rem;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          color: var(--text-primary);
-        }
-
-        .search-filter-bar {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 12px 16px;
-        }
-
-        @media (max-width: 600px) {
-          .search-filter-bar {
-            flex-direction: column;
-            align-items: stretch;
-          }
-        }
-
-        .search-input-wrapper {
-          position: relative;
-          flex: 1;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--text-muted);
-        }
-
-        .search-input {
-          padding-left: 36px;
-        }
-
-        .filter-select {
-          min-width: 150px;
-        }
-
-        .courses-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 16px;
-        }
-
-        .course-card {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          padding: 18px;
-        }
-
-        .course-card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-
-        .course-code {
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-
-        .course-title {
-          font-size: 0.95rem;
-          font-weight: 600;
-          color: var(--text-primary);
-          margin-bottom: 6px;
-          line-height: 1.3;
-        }
-
-        .course-description {
-          font-size: 0.8rem;
-          color: var(--text-secondary);
-          line-height: 1.4;
-          margin-bottom: 20px;
-          flex: 1;
-        }
-
-        .course-actions {
-          display: flex;
-          gap: 8px;
-          border-top: 1px solid var(--border-color);
-          padding-top: 14px;
-        }
-
-        .action-btn {
-          flex: 1;
-          justify-content: center;
-          padding: 6px 10px;
-          font-size: 0.8rem;
-        }
-
-        .empty-catalog {
-          grid-column: 1 / -1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 48px;
-          text-align: center;
-        }
-
-        .empty-icon {
-          color: var(--text-muted);
-          margin-bottom: 12px;
-        }
-
-        .empty-catalog h3 {
-          font-size: 0.9rem;
-          color: var(--text-primary);
-          margin-bottom: 4px;
-        }
-
-        .empty-catalog p {
-          color: var(--text-muted);
-          font-size: 0.8rem;
-        }
-      `}</style>
     </div>
   );
 };

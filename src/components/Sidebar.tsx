@@ -53,24 +53,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const RoleIcon = roleLabels[currentRole].icon;
 
   return (
-    <aside className="sidebar-container">
-      <div className="sidebar-brand">
-        <div className="brand-logo">
-          <Database size={24} className="brand-icon" />
+    <aside className="w-70 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] flex flex-col h-screen sticky top-0 p-6 transition-colors select-none">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-[var(--text-primary)] text-[var(--bg-app)] w-10 h-10 rounded-lg flex items-center justify-center shadow-sm">
+          <Database size={22} className="stroke-[2.5]" />
         </div>
-        <div className="brand-text">
-          <h1>CTSpace</h1>
-          <span>CT Department</span>
+        <div>
+          <h1 className="font-extrabold text-lg text-[var(--text-primary)] leading-tight tracking-tight">CTSpace</h1>
+          <span className="text-xs text-[var(--text-muted)] font-medium">CT Department</span>
         </div>
       </div>
 
-      <div className="role-sidebar-card">
-        <div className="role-card-header">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg p-2.5 mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
           <RoleIcon size={16} />
           <span>{roleLabels[currentRole].label}</span>
         </div>
         <button 
-          className="role-switch-btn" 
+          className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] rounded text-[11px] px-2 py-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-active)] font-medium transition cursor-pointer" 
           onClick={() => {
             setActiveTab('dashboard');
             const roles: ('admin' | 'faculty' | 'student')[] = ['admin', 'faculty', 'student'];
@@ -83,234 +83,52 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="flex flex-col gap-1.5 flex-1">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+              className={`relative flex items-center gap-3.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-left transition cursor-pointer ${
+                isActive 
+                  ? 'text-[var(--text-primary)] bg-[var(--bg-active)] shadow-sm' 
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
+              }`}
             >
-              <Icon size={20} className="nav-item-icon" />
+              <Icon size={18} />
               <span>{item.label}</span>
-              {activeTab === item.id && <div className="active-indicator" />}
+              {isActive && <div className="absolute left-0 top-1/4 h-1/2 w-1 bg-[var(--text-primary)] rounded-r" />}
             </button>
           );
         })}
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="db-badge">
-          <div className={`db-indicator ${useSupabase ? 'supabase' : 'mock'}`} />
+      <div className="border-t border-[var(--border-color)] pt-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2 px-3 py-2 bg-[var(--bg-card)] rounded-md border border-[var(--border-color)] text-xs text-[var(--text-secondary)] font-medium">
+          <div className={`w-2 h-2 rounded-full ${useSupabase ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
           <span>{useSupabase ? 'Supabase Connected' : 'Local Storage Mock'}</span>
         </div>
         
-        <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle Theme">
+        <button 
+          className="flex items-center justify-center gap-2 w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-color-hover)] text-[var(--text-primary)] font-semibold text-xs transition cursor-pointer" 
+          onClick={toggleTheme} 
+          title="Toggle Theme"
+        >
           {theme === 'dark' ? (
             <>
-              <Sun size={18} />
+              <Sun size={16} />
               <span>Light Mode</span>
             </>
           ) : (
             <>
-              <Moon size={18} />
+              <Moon size={16} />
               <span>Dark Mode</span>
             </>
           )}
         </button>
       </div>
-
-      <style>{`
-        .sidebar-container {
-          width: 280px;
-          background-color: var(--bg-sidebar);
-          border-right: 1px solid var(--border-color);
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-          position: sticky;
-          top: 0;
-          padding: 24px;
-          transition: background-color var(--transition-normal), border-color var(--transition-normal);
-        }
-
-        .sidebar-brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 24px;
-        }
-
-        .role-sidebar-card {
-          background-color: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-md);
-          padding: 10px 14px;
-          margin-bottom: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .role-card-header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .role-switch-btn {
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
-          color: var(--text-secondary);
-          font-size: 0.7rem;
-          padding: 4px 8px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all var(--transition-fast);
-        }
-
-        .role-switch-btn:hover {
-          color: var(--text-primary);
-          border-color: var(--border-color-hover);
-          background-color: var(--bg-active);
-        }
-
-        .brand-logo {
-          background-color: var(--primary);
-          color: white;
-          width: 42px;
-          height: 42px;
-          border-radius: var(--radius-md);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: var(--shadow-accent);
-        }
-
-        .brand-text h1 {
-          font-family: var(--font-display);
-          font-size: 1.25rem;
-          font-weight: 800;
-          color: var(--text-primary);
-          line-height: 1;
-        }
-
-        .brand-text span {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          font-weight: 500;
-        }
-
-        .sidebar-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          flex: 1;
-        }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          padding: 12px 16px;
-          border-radius: var(--radius-md);
-          background: transparent;
-          border: none;
-          color: var(--text-secondary);
-          font-family: var(--font-display);
-          font-size: 0.95rem;
-          font-weight: 600;
-          text-align: left;
-          cursor: pointer;
-          position: relative;
-          transition: all var(--transition-fast);
-        }
-
-        .nav-item:hover {
-          color: var(--text-primary);
-          background-color: var(--bg-card-hover);
-        }
-
-        .nav-item.active {
-          color: var(--primary);
-          background-color: var(--bg-active);
-        }
-
-        .active-indicator {
-          position: absolute;
-          left: 0;
-          top: 25%;
-          height: 50%;
-          width: 4px;
-          background-color: var(--primary);
-          border-radius: 0 4px 4px 0;
-        }
-
-        .sidebar-footer {
-          border-top: 1px solid var(--border-color);
-          padding-top: 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .db-badge {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 12px;
-          background-color: var(--bg-card);
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--border-color);
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-          font-weight: 600;
-        }
-
-        .db-indicator {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        .db-indicator.supabase {
-          background-color: var(--success);
-          box-shadow: 0 0 8px var(--success);
-        }
-
-        .db-indicator.mock {
-          background-color: var(--warning);
-          box-shadow: 0 0 8px var(--warning);
-        }
-
-        .theme-toggle-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          width: 100%;
-          padding: 10px;
-          border-radius: var(--radius-md);
-          border: 1px solid var(--border-color);
-          background-color: var(--bg-card);
-          color: var(--text-primary);
-          font-family: var(--font-display);
-          font-weight: 600;
-          font-size: 0.875rem;
-          cursor: pointer;
-          transition: all var(--transition-fast);
-        }
-
-        .theme-toggle-btn:hover {
-          background-color: var(--bg-card-hover);
-          border-color: var(--border-color-hover);
-        }
-      `}</style>
     </aside>
   );
 };

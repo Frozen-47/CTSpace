@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
-import { Search, Plus, User, Mail, BookOpen, Trash2, Edit, Award, MapPin, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, User, Mail, BookOpen, Trash2, Edit, Award, MapPin, GraduationCap, ChevronDown, ChevronUp, Phone, Calendar, Droplet, FileText, ExternalLink } from 'lucide-react';
 import { CLASS_GROUPS, type Course, type Instructor, type Student, type ClassInstance, type Enrollment } from '../mock/mockData';
+
+const GithubIcon: React.FC<{ size?: number }> = ({ size = 12 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+    <path d="M9 18c-4.51 2-5-2-7-2" />
+  </svg>
+);
+
+const LinkedinIcon: React.FC<{ size?: number }> = ({ size = 12 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
 
 interface DirectoryProps {
   instructors: Instructor[];
@@ -33,7 +48,7 @@ export const Directory: React.FC<DirectoryProps> = ({
   onAddEnrollment,
   onDeleteEnrollment
 }) => {
-  const [activeTab, setActiveTab] = useState<'faculty' | 'students'>('faculty');
+  const [activeTab, setActiveTab] = useState<'faculty' | 'students'>('students');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   const [studentClassFilter, setStudentClassFilter] = useState('all');
@@ -80,56 +95,72 @@ export const Directory: React.FC<DirectoryProps> = ({
   );
 
   const filteredStudents = students.filter(s => {
+    const q = searchTerm.toLowerCase();
     const matchesSearch = 
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchTerm.toLowerCase());
+      s.name.toLowerCase().includes(q) ||
+      s.email.toLowerCase().includes(q) ||
+      (s.rollNo && s.rollNo.toLowerCase().includes(q)) ||
+      (s.phone && s.phone.includes(q)) ||
+      (s.bloodGroup && s.bloodGroup.toLowerCase().includes(q)) ||
+      (s.group && s.group.toLowerCase().includes(q)) ||
+      (s.medium && s.medium.toLowerCase().includes(q)) ||
+      (s.github && s.github.toLowerCase().includes(q)) ||
+      (s.linkedin && s.linkedin.toLowerCase().includes(q));
       
     const matchesClass = studentClassFilter === 'all' || s.classGroup === studentClassFilter;
     return matchesSearch && matchesClass;
   });
 
   return (
-    <div className="directory-view animate-fade-in">
-      <header className="view-header">
+    <div className="flex flex-col animate-fade-in pb-12">
+      <header className="flex items-center justify-between mb-6">
         <div>
-          <h1>Directory</h1>
-          <p className="subtitle">Department profiles, faculty offices, and academic records.</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Directory</h1>
+          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Department profiles, student profiles, GitHub accounts & academic records.</p>
         </div>
         <div>
           {activeTab === 'faculty' ? (
-            <button className="btn btn-primary" onClick={onAddInstructor}>
-              <Plus size={16} />
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer shadow-sm" onClick={onAddInstructor}>
+              <Plus size={15} />
               Add Faculty
             </button>
           ) : (
-            <button className="btn btn-primary" onClick={onAddStudent}>
-              <Plus size={16} />
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer shadow-sm" onClick={onAddStudent}>
+              <Plus size={15} />
               Add Student
             </button>
           )}
         </div>
       </header>
 
-      <section className="directory-controls card">
-        <div className="directory-tabs">
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-1.5 bg-[var(--bg-card-hover)] p-1 rounded-lg border border-[var(--border-color)]">
           <button 
-            className={`directory-tab ${activeTab === 'faculty' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('faculty'); setSearchTerm(''); }}
-          >
-            Faculty & Staff ({instructors.length})
-          </button>
-          <button 
-            className={`directory-tab ${activeTab === 'students' ? 'active' : ''}`}
+            className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer ${
+              activeTab === 'students' 
+                ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm border border-[var(--border-color)]' 
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
             onClick={() => { setActiveTab('students'); setSearchTerm(''); }}
           >
             Students ({students.length})
           </button>
+          <button 
+            className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer ${
+              activeTab === 'faculty' 
+                ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm border border-[var(--border-color)]' 
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+            onClick={() => { setActiveTab('faculty'); setSearchTerm(''); }}
+          >
+            Faculty & Staff ({instructors.length})
+          </button>
         </div>
 
-        <div className="search-input-wrapper-flex">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           {activeTab === 'students' && (
             <select
-              className="form-select filter-select-dir"
+              className="px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs font-medium outline-none focus:border-[var(--text-secondary)] transition"
               value={studentClassFilter}
               onChange={(e) => setStudentClassFilter(e.target.value)}
             >
@@ -139,12 +170,12 @@ export const Directory: React.FC<DirectoryProps> = ({
               ))}
             </select>
           )}
-          <div className="search-input-wrapper">
-            <Search size={14} className="search-icon" />
+          <div className="relative flex-1 md:w-72">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
-              className="form-input search-input"
-              placeholder={activeTab === 'faculty' ? "Search faculty..." : "Search students..."}
+              className="w-full pl-9 pr-3.5 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs outline-none focus:border-[var(--text-secondary)] transition"
+              placeholder={activeTab === 'faculty' ? "Search faculty..." : "Search name, roll no, github, email..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -152,60 +183,60 @@ export const Directory: React.FC<DirectoryProps> = ({
         </div>
       </section>
 
-      <section className="roster-container">
+      <section>
         {activeTab === 'faculty' ? (
-          <div className="faculty-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredFaculty.length > 0 ? (
               filteredFaculty.map(inst => {
                 const taughtClasses = getInstructorClasses(inst.id);
                 return (
-                  <div key={inst.id} className="faculty-card card">
-                    <div className="faculty-info-header">
-                      <div className="avatar-placeholder">
+                  <div key={inst.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 flex flex-col justify-between transition shadow-sm gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
                         <User size={18} />
                       </div>
                       <div>
-                        <h3>{inst.name}</h3>
-                        <span className="badge badge-info">{inst.title}</span>
+                        <h3 className="font-bold text-sm text-[var(--text-primary)]">{inst.name}</h3>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 mt-1">{inst.title}</span>
                       </div>
                     </div>
 
-                    <div className="faculty-contact-details">
-                      <div className="contact-item">
-                        <Mail size={12} />
-                        <a href={`mailto:${inst.email}`}>{inst.email}</a>
+                    <div className="flex flex-col gap-2 text-xs text-[var(--text-secondary)] border-y border-[var(--border-color)] py-3">
+                      <div className="flex items-center gap-2">
+                        <Mail size={12} className="text-[var(--text-muted)]" />
+                        <a href={`mailto:${inst.email}`} className="hover:text-[var(--text-primary)] hover:underline truncate">{inst.email}</a>
                       </div>
-                      <div className="contact-item">
-                        <MapPin size={12} />
+                      <div className="flex items-center gap-2">
+                        <MapPin size={12} className="text-[var(--text-muted)]" />
                         <span>Office: {inst.office || 'TBD'}</span>
                       </div>
-                      <div className="contact-item">
-                        <Award size={12} />
-                        <span>Research: {inst.specialization}</span>
+                      <div className="flex items-center gap-2">
+                        <Award size={12} className="text-[var(--text-muted)]" />
+                        <span className="truncate">Research: {inst.specialization}</span>
                       </div>
                     </div>
 
-                    <div className="taught-classes-section">
-                      <h4>Assigned Courses ({taughtClasses.length})</h4>
+                    <div className="flex flex-col gap-2">
+                      <h4 className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Assigned Courses ({taughtClasses.length})</h4>
                       {taughtClasses.length > 0 ? (
-                        <div className="taught-classes-list">
+                        <div className="flex flex-col gap-1.5">
                           {taughtClasses.map(c => (
-                            <div key={c.id} className="taught-class-badge">
-                              <strong>{c.code}</strong>: Room {c.room} ({c.days} {c.time})
+                            <div key={c.id} className="text-xs p-2 rounded bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                              <strong className="text-[var(--text-primary)]">{c.code}</strong>: Room {c.room} ({c.days} {c.time})
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <span className="no-classes-text">No active courses.</span>
+                        <span className="text-xs text-[var(--text-muted)] italic">No active courses.</span>
                       )}
                     </div>
 
-                    <div className="roster-actions">
-                      <button className="btn btn-secondary action-btn" onClick={() => onEditInstructor(inst)}>
+                    <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-color)]">
+                      <button className="flex-1 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer" onClick={() => onEditInstructor(inst)}>
                         <Edit size={12} />
                         Edit
                       </button>
-                      <button className="btn btn-danger action-btn" onClick={() => onDeleteInstructor(inst.id)}>
+                      <button className="py-1.5 px-3 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-rose-500/10 text-rose-400 border-rose-500/20 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer" onClick={() => onDeleteInstructor(inst.id)}>
                         <Trash2 size={12} />
                         Remove
                       </button>
@@ -214,87 +245,191 @@ export const Directory: React.FC<DirectoryProps> = ({
                 );
               })
             ) : (
-              <div className="empty-roster card">
+              <div className="col-span-full p-8 text-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-muted)]">
                 <p>No faculty records match your criteria.</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="students-list-wrapper">
+          <div className="flex flex-col gap-3">
             {filteredStudents.length > 0 ? (
               filteredStudents.map(student => {
                 const isExpanded = expandedStudentId === student.id;
                 const studentEnrollments = getStudentEnrollments(student.id);
                 return (
-                  <div key={student.id} className="student-row-wrapper card">
-                    <div className="student-main-row" onClick={() => toggleStudentExpand(student.id)}>
-                      <div className="student-profile-summary">
-                        <div className="student-avatar">
+                  <div key={student.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl overflow-hidden transition shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between p-4 cursor-pointer hover:bg-[var(--bg-card-hover)] transition gap-3" onClick={() => toggleStudentExpand(student.id)}>
+                      <div className="flex items-center gap-3 min-w-[220px]">
+                        <div className="w-8 h-8 rounded-md bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
                           <GraduationCap size={16} />
                         </div>
-                        <div className="student-meta">
-                          <h3>{student.name}</h3>
-                          <span className="student-email">{student.email}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-sm text-[var(--text-primary)]">{student.name}</h3>
+                            {student.rollNo && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">{student.rollNo}</span>}
+                          </div>
+                          <span className="text-[11px] text-[var(--text-muted)]">{student.email} {student.phone ? `• ${student.phone}` : ''}</span>
                         </div>
                       </div>
 
-                      <div className="student-academic-info">
-                        <div className="academic-tag">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {student.github && (
+                          <a 
+                            href={student.github.startsWith('http') ? student.github : `https://${student.github}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded text-slate-200 bg-slate-800/60 border border-slate-700 hover:bg-slate-700/80 transition text-decoration-none"
+                            onClick={(e) => e.stopPropagation()}
+                            title="GitHub Profile"
+                          >
+                            <GithubIcon size={11} />
+                            <span>GitHub</span>
+                          </a>
+                        )}
+                        {student.linkedin && (
+                          <a 
+                            href={student.linkedin.startsWith('http') ? student.linkedin : `https://${student.linkedin}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded text-sky-400 bg-sky-500/10 border border-sky-500/30 hover:bg-sky-500/20 transition text-decoration-none"
+                            onClick={(e) => e.stopPropagation()}
+                            title="LinkedIn Profile"
+                          >
+                            <LinkedinIcon size={11} />
+                            <span>LinkedIn</span>
+                          </a>
+                        )}
+                        {student.bloodGroup && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded text-rose-400 bg-rose-500/10 border border-rose-500/25">
+                            <Droplet size={10} />
+                            {student.bloodGroup}
+                          </span>
+                        )}
+                        {student.medium && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded text-blue-400 bg-blue-500/10 border border-blue-500/25">
+                            {student.medium}
+                          </span>
+                        )}
+                        <div className="text-[11px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-card-hover)] border border-[var(--border-color)] px-2 py-0.5 rounded">
                           <span>{student.classGroup}</span>
                         </div>
                       </div>
 
-                      <div className="student-row-interactions">
-                        <button className="icon-btn" onClick={(e) => { e.stopPropagation(); onEditStudent(student); }} title="Edit">
-                          <Edit size={12} />
+                      <div className="flex items-center gap-2 self-end md:self-auto">
+                        <button className="p-1.5 rounded-md hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer" onClick={(e) => { e.stopPropagation(); onEditStudent(student); }} title="Edit">
+                          <Edit size={13} />
                         </button>
-                        <button className="icon-btn danger" onClick={(e) => { e.stopPropagation(); onDeleteStudent(student.id); }} title="Delete">
-                          <Trash2 size={12} />
+                        <button className="p-1.5 rounded-md hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 text-rose-400 transition cursor-pointer" onClick={(e) => { e.stopPropagation(); onDeleteStudent(student.id); }} title="Delete">
+                          <Trash2 size={13} />
                         </button>
-                        <div className="expand-indicator">
+                        <div className="text-[var(--text-muted)] ml-1">
                           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </div>
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="student-expanded-panel animate-fade-in">
-                        <div className="expanded-panel-header">
-                          <h4>Course Registrations</h4>
-                          <button className="btn btn-secondary btn-sm" onClick={() => onAddEnrollment(student.id)}>
+                      <div className="border-t border-[var(--border-color)] bg-[var(--bg-card-hover)] p-4 md:p-5 animate-fade-in">
+                        {/* Student Details Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 mb-4 bg-[var(--bg-card)] p-3 rounded-lg border border-[var(--border-color)]">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><FileText size={11} /> Roll Number</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.rollNo || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><Mail size={11} /> Email</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate" title={student.email}>{student.email || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><Phone size={11} /> Phone Number</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.phone || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><GithubIcon size={11} /> GitHub Profile</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                              {student.github ? (
+                                <a href={student.github.startsWith('http') ? student.github : `https://${student.github}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-indigo-400 hover:underline">
+                                  {student.github.replace(/^https?:\/\/(www\.)?github\.com\/?/, '')} <ExternalLink size={10} />
+                                </a>
+                              ) : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><LinkedinIcon size={11} /> LinkedIn</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                              {student.linkedin ? (
+                                <a href={student.linkedin.startsWith('http') ? student.linkedin : `https://${student.linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sky-400 hover:underline">
+                                  LinkedIn Profile <ExternalLink size={10} />
+                                </a>
+                              ) : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><Calendar size={11} /> Date of Birth</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.dob || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><Droplet size={11} /> Blood Group</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.bloodGroup || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)]">Subject Group</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.group || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)]">Medium</span>
+                            <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.medium || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5 bg-emerald-500/10 p-1.5 rounded border border-emerald-500/20">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)]">10th Mark</span>
+                            <span className="text-xs font-bold text-emerald-400">{student.mark10 || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5 bg-emerald-500/10 p-1.5 rounded border border-emerald-500/20">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)]">11th Mark</span>
+                            <span className="text-xs font-bold text-emerald-400">{student.mark11 || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5 bg-emerald-500/10 p-1.5 rounded border border-emerald-500/20">
+                            <span className="text-[10px] font-medium text-[var(--text-muted)]">12th Mark</span>
+                            <span className="text-xs font-bold text-emerald-400">{student.mark12 || 'N/A'}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center mb-3 mt-4">
+                          <h4 className="text-xs font-bold text-[var(--text-primary)]">Course Registrations</h4>
+                          <button className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition cursor-pointer" onClick={() => onAddEnrollment(student.id)}>
                             <Plus size={12} />
                             Register Class
                           </button>
                         </div>
 
                         {studentEnrollments.length > 0 ? (
-                          <div className="enrollments-table-wrapper">
-                            <table className="enrollments-table">
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse text-left">
                               <thead>
-                                <tr>
-                                  <th>Course</th>
-                                  <th>Schedule</th>
-                                  <th>Room</th>
-                                  <th>Grade</th>
-                                  <th style={{ textAlign: 'right' }}>Actions</th>
+                                <tr className="border-b border-[var(--border-color)]">
+                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Course</th>
+                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Schedule</th>
+                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Room</th>
+                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Grade</th>
+                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2 text-right">Actions</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {studentEnrollments.map(enr => (
-                                  <tr key={enr.enrollmentId}>
-                                    <td>
-                                      <strong>{enr.code}</strong>: {enr.name}
+                                  <tr key={enr.enrollmentId} className="border-b border-[var(--border-color)] last:border-none">
+                                    <td className="p-2 text-xs text-[var(--text-secondary)]">
+                                      <strong className="text-[var(--text-primary)]">{enr.code}</strong>: {enr.name}
                                     </td>
-                                    <td>{enr.days} ({enr.time})</td>
-                                    <td>{enr.room}</td>
-                                    <td>
-                                      <span className={`badge ${enr.grade === 'IP' ? 'badge-warning' : 'badge-success'}`}>
+                                    <td className="p-2 text-xs text-[var(--text-secondary)]">{enr.days} ({enr.time})</td>
+                                    <td className="p-2 text-xs text-[var(--text-secondary)]">{enr.room}</td>
+                                    <td className="p-2 text-xs">
+                                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${enr.grade === 'IP' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
                                         {enr.grade === 'IP' ? 'In Progress' : enr.grade}
                                       </span>
                                     </td>
-                                    <td style={{ textAlign: 'right' }}>
+                                    <td className="p-2 text-xs text-right">
                                       <button 
-                                        className="btn-link-danger" 
+                                        className="text-xs text-rose-400 hover:underline bg-transparent border-none font-medium cursor-pointer" 
                                         onClick={() => onDeleteEnrollment(enr.enrollmentId)}
                                       >
                                         Drop
@@ -306,7 +441,7 @@ export const Directory: React.FC<DirectoryProps> = ({
                             </table>
                           </div>
                         ) : (
-                          <div className="empty-enrollments">
+                          <div className="flex flex-col items-center justify-center p-6 text-[var(--text-muted)] text-xs gap-1.5">
                             <BookOpen size={18} />
                             <p>No active registrations.</p>
                           </div>
@@ -317,374 +452,13 @@ export const Directory: React.FC<DirectoryProps> = ({
                 );
               })
             ) : (
-              <div className="empty-roster card">
+              <div className="p-8 text-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-muted)]">
                 <p>No student records match your criteria.</p>
               </div>
             )}
           </div>
         )}
       </section>
-
-      <style>{`
-        .directory-view {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .view-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-
-        .view-header h1 {
-          font-size: 1.6rem;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          color: var(--text-primary);
-        }
-
-        .directory-controls {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 12px 16px;
-        }
-
-        @media (max-width: 768px) {
-          .directory-controls {
-            flex-direction: column;
-            align-items: stretch;
-          }
-        }
-
-        .directory-tabs {
-          display: flex;
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          padding: 3px;
-        }
-
-        .directory-tab {
-          padding: 6px 12px;
-          border-radius: var(--radius-sm);
-          font-size: 0.8rem;
-          font-weight: 500;
-          color: var(--text-secondary);
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          transition: all var(--transition-fast);
-        }
-
-        .directory-tab.active {
-          background-color: var(--bg-card);
-          color: var(--text-primary);
-          border: 1px solid var(--border-color);
-        }
-
-        .search-input-wrapper {
-          position: relative;
-          flex: 1;
-          max-width: 320px;
-        }
-
-        @media (max-width: 768px) {
-          .search-input-wrapper {
-            max-width: none;
-          }
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--text-muted);
-        }
-
-        .search-input {
-          padding-left: 36px;
-        }
-
-        .search-input-wrapper-flex {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          flex: 1;
-          justify-content: flex-end;
-        }
-
-        .filter-select-dir {
-          max-width: 160px;
-        }
-
-        .faculty-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 16px;
-        }
-
-        .faculty-card {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          padding: 18px;
-        }
-
-        .faculty-info-header {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .avatar-placeholder {
-          width: 36px;
-          height: 36px;
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          color: var(--text-secondary);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .faculty-info-header h3 {
-          font-size: 0.95rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .faculty-contact-details {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          padding: 10px;
-        }
-
-        .contact-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-        }
-
-        .contact-item a {
-          color: var(--text-primary);
-          text-decoration: none;
-        }
-
-        .contact-item a:hover {
-          text-decoration: underline;
-        }
-
-        .taught-classes-section h4 {
-          font-size: 0.8rem;
-          color: var(--text-secondary);
-          margin-bottom: 6px;
-        }
-
-        .taught-classes-list {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .taught-class-badge {
-          background-color: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          padding: 4px 8px;
-          font-size: 0.72rem;
-          color: var(--text-secondary);
-        }
-
-        .no-classes-text {
-          font-size: 0.72rem;
-          color: var(--text-muted);
-        }
-
-        .students-list-wrapper {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .student-row-wrapper {
-          padding: 0;
-          overflow: hidden;
-        }
-
-        .student-main-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 12px 20px;
-          cursor: pointer;
-          transition: background-color var(--transition-fast);
-        }
-
-        .student-main-row:hover {
-          background-color: var(--bg-card-hover);
-        }
-
-        .student-profile-summary {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          min-width: 220px;
-        }
-
-        .student-avatar {
-          width: 32px;
-          height: 32px;
-          border-radius: var(--radius-sm);
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          color: var(--text-secondary);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .student-meta h3 {
-          font-size: 0.88rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .student-email {
-          font-size: 0.72rem;
-          color: var(--text-muted);
-        }
-
-        .student-academic-info {
-          display: flex;
-          gap: 12px;
-        }
-
-        .academic-tag {
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-          background-color: var(--bg-card-hover);
-          border: 1px solid var(--border-color);
-          padding: 3px 8px;
-          border-radius: var(--radius-sm);
-        }
-
-        .student-row-interactions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .expand-indicator {
-          color: var(--text-muted);
-          margin-left: 4px;
-        }
-
-        .student-expanded-panel {
-          border-top: 1px solid var(--border-color);
-          background-color: var(--bg-card-hover);
-          padding: 16px 20px;
-        }
-
-        .expanded-panel-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-
-        .expanded-panel-header h4 {
-          font-size: 0.825rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .btn-sm {
-          padding: 4px 8px;
-          font-size: 0.75rem;
-        }
-
-        .enrollments-table-wrapper {
-          overflow-x: auto;
-        }
-
-        .enrollments-table {
-          width: 100%;
-          border-collapse: collapse;
-          text-align: left;
-        }
-
-        .enrollments-table th {
-          font-size: 0.7rem;
-          font-weight: 600;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          padding: 6px 8px;
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .enrollments-table td {
-          font-size: 0.78rem;
-          padding: 8px;
-          border-bottom: 1px solid var(--border-color);
-          color: var(--text-secondary);
-        }
-
-        .enrollments-table tr:last-child td {
-          border-bottom: none;
-        }
-
-        .btn-link-danger {
-          background: transparent;
-          border: none;
-          color: var(--danger);
-          font-weight: 500;
-          font-size: 0.75rem;
-          cursor: pointer;
-        }
-
-        .btn-link-danger:hover {
-          text-decoration: underline;
-        }
-
-        .empty-enrollments {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          color: var(--text-muted);
-          font-size: 0.75rem;
-          gap: 6px;
-        }
-
-        .empty-roster {
-          text-align: center;
-          padding: 32px;
-          color: var(--text-muted);
-          font-size: 0.8rem;
-        }
-
-        .roster-actions {
-          display: flex;
-          gap: 8px;
-          margin-top: auto;
-          border-top: 1px solid var(--border-color);
-          padding-top: 12px;
-        }
-      `}</style>
     </div>
   );
 };
