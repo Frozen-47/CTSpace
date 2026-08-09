@@ -608,6 +608,57 @@ export const ClassModal: React.FC<ClassModalProps> = ({
                   />
                 </div>
               </div>
+
+              {/* Fee Payment Section */}
+              <div className="p-3.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card-hover)] flex flex-col gap-3">
+                <h4 className="text-xs font-bold text-[var(--text-primary)] flex items-center justify-between">
+                  <span>Fee Payment Status</span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                    (formData.feeStatus || 'Paid') === 'Paid' 
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                      : (formData.feeStatus || 'Paid') === 'Partial'
+                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                  }`}>
+                    {formData.feeStatus || 'Paid'}
+                  </span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Status</label>
+                    <select
+                      name="feeStatus"
+                      className="w-full px-2.5 py-1.5 rounded border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs outline-none"
+                      value={formData.feeStatus || 'Paid'}
+                      onChange={handleInputChange}
+                    >
+                      <option value="Paid">Paid</option>
+                      <option value="Partial">Partial</option>
+                      <option value="Pending">Pending</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Total Fee (₹)</label>
+                    <input
+                      type="number"
+                      name="totalFee"
+                      className="w-full px-2.5 py-1.5 rounded border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs outline-none"
+                      value={formData.totalFee ?? 45000}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Paid Amount (₹)</label>
+                    <input
+                      type="number"
+                      name="paidAmount"
+                      className="w-full px-2.5 py-1.5 rounded border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs outline-none"
+                      value={formData.paidAmount ?? 45000}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+              </div>
             </>
           )}
 

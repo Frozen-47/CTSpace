@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  BookOpen, 
   Calendar, 
   Users, 
   ArrowUpRight,
@@ -11,7 +10,10 @@ import {
   GraduationCap,
   Plus,
   Briefcase,
-  Building
+  Building,
+  CreditCard,
+  AlertCircle,
+  Award
 } from 'lucide-react';
 import type { Course, Instructor, Student, ClassInstance, Enrollment } from '../mock/mockData';
 
@@ -64,7 +66,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onAddCourse,
   onAddClass,
   onAddStudent,
-  onAddInstructor
+  onAddInstructor: _onAddInstructor
 }) => {
   const [scheduleDayFilter, setScheduleDayFilter] = useState<string>('Monday');
 
@@ -79,15 +81,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
   });
 
   // ADMIN CALCULATIONS
-  const totalCourses = courses.length;
-  const activeClasses = classes.length;
-  const totalFaculty = instructors.length;
   const totalStudents = students.length;
-  const totalEnrollments = enrollments.length;
 
-  const averageClassSize = activeClasses > 0 
-    ? Math.round(totalEnrollments / activeClasses * 10) / 10 
-    : 0;
+  // FEE COLLECTION STATS
+  const paidStudents = students.filter(s => (s.feeStatus || 'Paid') === 'Paid');
+  const partialStudents = students.filter(s => s.feeStatus === 'Partial');
+  const pendingStudents = students.filter(s => s.feeStatus === 'Pending');
+
+  const totalExpectedFee = students.reduce((sum, s) => sum + (s.totalFee ?? 45000), 0);
+  const totalCollectedFee = students.reduce((sum, s) => sum + (s.paidAmount ?? 45000), 0);
+  const totalPendingFee = Math.max(0, totalExpectedFee - totalCollectedFee);
+  const feeCollectionRate = totalExpectedFee > 0 ? Math.round((totalCollectedFee / totalExpectedFee) * 100) : 100;
+
+  // MARKS ANALYTICS
+  const getNumMark = (mStr?: string): number | null => {
+    if (!mStr || mStr === 'NA') return null;
+    const val = parseFloat(mStr.replace('%', '').trim());
+    return isNaN(val) ? null : val;
+  };
+
+  const m10List = students.map(s => getNumMark(s.mark10)).filter((v): v is number => v !== null);
+  const m11List = students.map(s => getNumMark(s.mark11)).filter((v): v is number => v !== null);
+  const m12List = students.map(s => getNumMark(s.mark12)).filter((v): v is number => v !== null);
+
+  const avg10 = m10List.length > 0 ? (m10List.reduce((a, b) => a + b, 0) / m10List.length).toFixed(1) : 'N/A';
+  const avg11 = m11List.length > 0 ? (m11List.reduce((a, b) => a + b, 0) / m11List.length).toFixed(1) : 'N/A';
+  const avg12 = m12List.length > 0 ? (m12List.reduce((a, b) => a + b, 0) / m12List.length).toFixed(1) : 'N/A';
 
   const roomBookings: { [room: string]: number } = {};
   classes.forEach(c => {
@@ -99,16 +118,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .slice(0, 4);
 
   const filteredAdminClasses = classes.filter(c => c.scheduleDays.includes(scheduleDayFilter));
-
-  const capacityWarningClasses = classes
-    .map(cls => {
-      const count = classEnrollmentCounts[cls.id] || 0;
-      const course = courses.find(c => c.id === cls.courseId);
-      const percent = Math.round((count / cls.capacity) * 100);
-      return { cls, course, count, percent };
-    })
-    .sort((a, b) => b.percent - a.percent)
-    .slice(0, 4);
 
   // FACULTY CALCULATIONS
   const facultyClasses = activeInstructor 
@@ -135,8 +144,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return { cls, course, enrollment, inst };
   }).filter(item => item.course !== undefined);
 
-  const totalStudentCredits = studentEnrolledCourses.reduce((sum, item) => sum + (item.course?.credits || 0), 0);
-
   let totalGradePoints = 0;
   let gradedCoursesCount = 0;
   studentEnrollments.forEach(e => {
@@ -151,8 +158,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     ? (totalGradePoints / gradedCoursesCount).toFixed(2) 
     : 'N/A';
 
-  const studentClassesToday = studentClasses.filter(c => c.scheduleDays.includes(scheduleDayFilter));
-
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-12">
       {/* Header Bar */}
@@ -163,15 +168,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {currentRole === 'faculty' && <UserCheck size={22} className="text-emerald-400" />}
             {currentRole === 'student' && <GraduationCap size={22} className="text-sky-400" />}
             <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
-              {currentRole === 'admin' && 'Department Admin Control Center'}
+              {currentRole === 'admin' && 'Student Data & Fee Management Center'}
               {currentRole === 'faculty' && 'Faculty Workspace'}
-              {currentRole === 'student' && 'Student Portal'}
+              {currentRole === 'student' && 'Student Portal & Fee Status'}
             </h1>
           </div>
           <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
-            {currentRole === 'admin' && 'System analytics, active timetables, and department management.'}
+            {currentRole === 'admin' && 'Department student records, fee collection status, and 10th/11th/12th marks analytics.'}
             {currentRole === 'faculty' && `Managing teaching schedule, course rosters, and grades for ${activeInstructor?.name || 'Faculty'}.`}
-            {currentRole === 'student' && `Academic performance, class schedule, and enrolled courses for ${activeStudent?.name || 'Student'}.`}
+            {currentRole === 'student' && `Academic performance, fee payment records, and registered courses for ${activeStudent?.name || 'Student'}.`}
           </p>
         </div>
 
@@ -258,50 +263,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {currentRole === 'admin' && (
         <>
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 cursor-pointer transition flex flex-col justify-between gap-4 shadow-sm" onClick={() => setActiveTab('courses')}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">Courses Offered</span>
-                  <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{totalCourses}</div>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
-                  <BookOpen size={18} />
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-color)] font-medium">
-                <span>View catalog</span>
-                <ArrowUpRight size={14} />
-              </div>
-            </div>
-
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 cursor-pointer transition flex flex-col justify-between gap-4 shadow-sm" onClick={() => setActiveTab('schedule')}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">Active Class Slots</span>
-                  <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{activeClasses}</div>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
-                  <Calendar size={18} />
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-color)] font-medium">
-                <span>View timetable</span>
-                <ArrowUpRight size={14} />
-              </div>
-            </div>
-
             <div className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 cursor-pointer transition flex flex-col justify-between gap-4 shadow-sm" onClick={() => setActiveTab('directory')}>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">Faculty Roster</span>
-                  <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{totalFaculty}</div>
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">Total Student Records</span>
+                  <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{totalStudents}</div>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
                   <Users size={18} />
                 </div>
               </div>
               <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-color)] font-medium">
-                <span>View faculty</span>
+                <span>Browse Student Roster</span>
                 <ArrowUpRight size={14} />
               </div>
             </div>
@@ -309,15 +282,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 cursor-pointer transition flex flex-col justify-between gap-4 shadow-sm" onClick={() => setActiveTab('directory')}>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">Total Enrolled Students</span>
-                  <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{totalStudents}</div>
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">Total Fees Collected</span>
+                  <div className="text-2xl font-extrabold text-emerald-400 mt-1">₹{(totalCollectedFee / 100000).toFixed(2)}L</div>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
-                  <UserCheck size={18} />
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                  <CreditCard size={18} />
                 </div>
               </div>
               <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-color)] font-medium">
-                <span>Student directory</span>
+                <span>{feeCollectionRate}% Collection Rate</span>
+                <ArrowUpRight size={14} />
+              </div>
+            </div>
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 cursor-pointer transition flex flex-col justify-between gap-4 shadow-sm" onClick={() => setActiveTab('directory')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">Pending Fees Amount</span>
+                  <div className="text-2xl font-extrabold text-rose-400 mt-1">₹{(totalPendingFee / 10000).toFixed(0)}k</div>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center">
+                  <AlertCircle size={18} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-color)] font-medium">
+                <span>{pendingStudents.length + partialStudents.length} Students Pending</span>
+                <ArrowUpRight size={14} />
+              </div>
+            </div>
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl p-5 cursor-pointer transition flex flex-col justify-between gap-4 shadow-sm" onClick={() => setActiveTab('directory')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">Avg 12th Marks (%)</span>
+                  <div className="text-2xl font-extrabold text-sky-400 mt-1">{avg12}%</div>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center">
+                  <Award size={18} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-color)] font-medium">
+                <span>Cohort Academic Avg</span>
                 <ArrowUpRight size={14} />
               </div>
             </div>
@@ -325,8 +330,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Quick Actions */}
           <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
-            <span className="text-xs font-bold text-[var(--text-primary)]">Quick Department Actions:</span>
+            <span className="text-xs font-bold text-[var(--text-primary)]">Student & Department Actions:</span>
             <div className="flex flex-wrap gap-2">
+              {onAddStudent && (
+                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--text-primary)] text-[var(--bg-app)] hover:bg-[var(--primary-hover)] text-xs font-semibold transition cursor-pointer" onClick={onAddStudent}>
+                  <Plus size={13} /> Add Student Record
+                </button>
+              )}
               {onAddCourse && (
                 <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold transition cursor-pointer" onClick={onAddCourse}>
                   <Plus size={13} /> Add Course
@@ -337,21 +347,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <Plus size={13} /> Schedule Class
                 </button>
               )}
-              {onAddInstructor && (
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold transition cursor-pointer" onClick={onAddInstructor}>
-                  <Plus size={13} /> Add Instructor
-                </button>
-              )}
-              {onAddStudent && (
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold transition cursor-pointer" onClick={onAddStudent}>
-                  <Plus size={13} /> Add Student
-                </button>
-              )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 flex flex-col gap-6">
+              {/* Fee Collection Status Grid */}
+              <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">
+                <h2 className="text-sm font-bold text-[var(--text-primary)] mb-4 flex items-center justify-between">
+                  <span>Student Fee Payment Overview</span>
+                  <span className="text-xs font-semibold text-emerald-400">Total Expected: ₹{totalExpectedFee.toLocaleString()}</span>
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex flex-col">
+                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Fee Cleared (Paid)</span>
+                    <div className="text-xl font-extrabold text-emerald-400 mt-1">{paidStudents.length} Students</div>
+                    <span className="text-[11px] text-[var(--text-muted)] mt-1">₹{(paidStudents.length * 45000).toLocaleString()} Collected</span>
+                  </div>
+
+                  <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex flex-col">
+                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Partially Paid</span>
+                    <div className="text-xl font-extrabold text-amber-400 mt-1">{partialStudents.length} Students</div>
+                    <span className="text-[11px] text-[var(--text-muted)] mt-1">₹{partialStudents.reduce((sum, s) => sum + (s.paidAmount || 0), 0).toLocaleString()} Received</span>
+                  </div>
+
+                  <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex flex-col">
+                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Pending Payment</span>
+                    <div className="text-xl font-extrabold text-rose-400 mt-1">{pendingStudents.length} Students</div>
+                    <span className="text-[11px] text-[var(--text-muted)] mt-1">₹{(pendingStudents.length * 45000).toLocaleString()} Outstanding</span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-2 bg-[var(--border-color)] rounded-full overflow-hidden flex">
+                  <div className="h-full bg-emerald-500" style={{ width: `${(paidStudents.length / totalStudents) * 100}%` }} title="Paid" />
+                  <div className="h-full bg-amber-500" style={{ width: `${(partialStudents.length / totalStudents) * 100}%` }} title="Partial" />
+                  <div className="h-full bg-rose-500" style={{ width: `${(pendingStudents.length / totalStudents) * 100}%` }} title="Pending" />
+                </div>
+              </div>
+
+              {/* Department Daily Schedule */}
               <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-bold text-[var(--text-primary)]">Department Daily Schedule</h2>
@@ -408,48 +444,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <p className="text-xs text-[var(--text-muted)] italic text-center py-6">No scheduled classes on {scheduleDayFilter}.</p>
                 )}
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 flex flex-col justify-between">
-                  <span className="text-xs font-semibold text-[var(--text-secondary)]">Average Class Size</span>
-                  <div className="text-3xl font-extrabold text-[var(--text-primary)] my-2">{averageClassSize}</div>
-                  <span className="text-[11px] text-[var(--text-muted)]">Students per scheduled section</span>
-                  <div className="w-full h-1.5 bg-[var(--border-color)] rounded-full overflow-hidden mt-3">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(averageClassSize * 4, 100)}%` }} />
-                  </div>
-                </div>
-
-                <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 flex flex-col justify-between">
-                  <span className="text-xs font-semibold text-[var(--text-secondary)]">Total Seat Capacity Utilization</span>
-                  <div className="text-3xl font-extrabold text-[var(--text-primary)] my-2">
-                    {Math.round((totalEnrollments / (classes.reduce((sum, c) => sum + c.capacity, 0) || 1)) * 100)}%
-                  </div>
-                  <span className="text-[11px] text-[var(--text-muted)]">Overall department seat usage</span>
-                  <div className="w-full h-1.5 bg-[var(--border-color)] rounded-full overflow-hidden mt-3">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${Math.min(Math.round((totalEnrollments / (classes.reduce((sum, c) => sum + c.capacity, 0) || 1)) * 100), 100)}%` }} />
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div className="flex flex-col gap-6">
+              {/* Department Marks Analytics Card */}
               <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">
-                <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">Highest Capacity Classes</h2>
-                <div className="flex flex-col divide-y divide-[var(--border-color)]">
-                  {capacityWarningClasses.map(({ cls, course, count, percent }) => (
-                    <div key={cls.id} className="py-2.5 flex items-center justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-[var(--text-primary)]">{course?.code} (Room {cls.room})</h4>
-                        <span className="text-[11px] text-[var(--text-muted)]">{count}/{cls.capacity} seats filled</span>
-                      </div>
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${percent >= 90 ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
-                        {percent}%
-                      </span>
-                    </div>
-                  ))}
+                <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">Cohort Marks Analytics</h2>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card-hover)]">
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">10th Average Mark</span>
+                    <span className="text-sm font-extrabold text-emerald-400">{avg10}%</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card-hover)]">
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">11th Average Mark</span>
+                    <span className="text-sm font-extrabold text-emerald-400">{avg11}%</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card-hover)]">
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">12th Average Mark</span>
+                    <span className="text-sm font-extrabold text-emerald-400">{avg12}%</span>
+                  </div>
                 </div>
               </div>
 
+              {/* Room Utilization */}
               <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">
                 <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">Top Room Utilization</h2>
                 <div className="flex flex-col divide-y divide-[var(--border-color)]">
@@ -541,42 +558,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <p className="text-xs text-[var(--text-muted)] italic text-center py-6">No teaching sessions scheduled on {scheduleDayFilter}.</p>
               )}
             </div>
-
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">
-              <h2 className="text-sm font-bold text-[var(--text-primary)] mb-4">Course Rosters Preview</h2>
-              <div className="flex flex-col gap-4">
-                {facultyClasses.map(cls => {
-                  const course = courses.find(c => c.id === cls.courseId);
-                  const enrolled = enrollments
-                    .filter(e => e.classId === cls.id)
-                    .map(e => ({ student: students.find(s => s.id === e.studentId), enrollment: e }))
-                    .filter(item => item.student !== undefined);
-
-                  return (
-                    <div key={cls.id} className="border border-[var(--border-color)] rounded-lg p-4 bg-[var(--bg-card-hover)]">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xs font-bold text-[var(--text-primary)]">{course?.code} - {course?.name} (Room {cls.room})</h3>
-                        <span className="text-[11px] font-semibold text-[var(--text-muted)]">{enrolled.length} Enrolled</span>
-                      </div>
-
-                      {enrolled.length > 0 ? (
-                        <div className="flex flex-col gap-1 text-xs">
-                          {enrolled.slice(0, 5).map(({ student, enrollment }) => (
-                            <div key={enrollment.id} className="flex items-center justify-between py-1 border-b border-[var(--border-color)] last:border-none">
-                              <span className="font-medium text-[var(--text-primary)]">{student?.name}</span>
-                              <span className="text-[var(--text-secondary)]">{student?.classGroup}</span>
-                              <span className="font-semibold text-emerald-400">{enrollment.grade || 'IP'}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-[var(--text-muted)] italic">No students currently enrolled in this class section.</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -599,71 +580,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {currentRole === 'student' && activeStudent && (
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col">
-              <span className="text-xs font-semibold text-[var(--text-secondary)]">Enrolled Courses</span>
-              <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{studentEnrolledCourses.length}</div>
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col justify-between">
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">Fee Status</span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className={`text-base font-extrabold px-2.5 py-0.5 rounded border ${
+                  (activeStudent.feeStatus || 'Paid') === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' : (activeStudent.feeStatus || 'Paid') === 'Partial' ? 'bg-amber-500/10 text-amber-400 border-amber-500/25' : 'bg-rose-500/10 text-rose-400 border-rose-500/25'
+                }`}>
+                  {activeStudent.feeStatus || 'Paid'}
+                </span>
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Paid: ₹{(activeStudent.paidAmount ?? 45000).toLocaleString()}</span>
             </div>
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col">
-              <span className="text-xs font-semibold text-[var(--text-secondary)]">Total Credits</span>
-              <div className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{totalStudentCredits}</div>
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col justify-between">
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">12th Board Mark</span>
+              <div className="text-2xl font-extrabold text-sky-400 mt-1">{activeStudent.mark12 || 'N/A'}</div>
+              <span className="text-[11px] text-[var(--text-muted)]">10th: {activeStudent.mark10 || 'N/A'} • 11th: {activeStudent.mark11 || 'N/A'}</span>
             </div>
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col">
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col justify-between">
               <span className="text-xs font-semibold text-[var(--text-secondary)]">Cumulative GPA</span>
               <div className="text-2xl font-extrabold text-emerald-400 mt-1">{studentGpa}</div>
-            </div>
-            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col">
-              <span className="text-xs font-semibold text-[var(--text-secondary)]">Cohort</span>
-              <div className="text-sm font-bold text-[var(--text-primary)] mt-2">{activeStudent.classGroup}</div>
-            </div>
-          </div>
-
-          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-[var(--text-primary)]">My Daily Timetable ({scheduleDayFilter})</h2>
-              <div className="flex items-center gap-1 bg-[var(--bg-card-hover)] p-1 rounded-lg border border-[var(--border-color)]">
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => (
-                  <button
-                    key={day}
-                    className={`px-2.5 py-1 rounded text-xs font-semibold transition cursor-pointer ${
-                      scheduleDayFilter === day 
-                        ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm' 
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                    onClick={() => setScheduleDayFilter(day)}
-                  >
-                    {day.substring(0, 3)}
-                  </button>
-                ))}
-              </div>
+              <span className="text-[11px] text-[var(--text-muted)]">{studentEnrolledCourses.length} Registered Courses</span>
             </div>
 
-            {studentClassesToday.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {studentClassesToday.map(cls => {
-                  const course = courses.find(c => c.id === cls.courseId);
-                  const inst = instructors.find(i => i.id === cls.instructorId);
-                  return (
-                    <div key={cls.id} className="flex items-center justify-between p-3.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card-hover)]">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)] font-medium">
-                          <Clock size={12} />
-                          <span>{cls.scheduleTime}</span>
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-[var(--text-primary)]">{course?.code}: {course?.name}</h3>
-                          <span className="text-xs text-[var(--text-secondary)]">Instructor: {inst?.title} {inst?.name}</span>
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-secondary)]">
-                        Room {cls.room}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-xs text-[var(--text-muted)] italic text-center py-6">No classes scheduled on {scheduleDayFilter}.</p>
-            )}
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 flex flex-col justify-between">
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">Roll Number</span>
+              <div className="text-sm font-extrabold text-[var(--text-primary)] mt-1">{activeStudent.rollNo || 'N/A'}</div>
+              <span className="text-[11px] text-[var(--text-muted)]">{activeStudent.classGroup}</span>
+            </div>
           </div>
 
           <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm">

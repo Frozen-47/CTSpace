@@ -18,7 +18,7 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
-  useSupabase: boolean;
+  useSupabase?: boolean;
   currentRole: 'admin' | 'faculty' | 'student';
   setCurrentRole: (role: 'admin' | 'faculty' | 'student') => void;
 }
@@ -28,7 +28,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab, 
   theme, 
   setTheme,
-  useSupabase,
   currentRole,
   setCurrentRole
 }) => {
@@ -107,8 +106,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="border-t border-[var(--border-color)] pt-4 flex flex-col gap-3">
         <div className="flex items-center gap-2 px-3 py-2 bg-[var(--bg-card)] rounded-md border border-[var(--border-color)] text-xs text-[var(--text-secondary)] font-medium">
-          <div className={`w-2 h-2 rounded-full ${useSupabase ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
-          <span>{useSupabase ? 'Supabase Connected' : 'Local Storage Mock'}</span>
+          <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+          <span>Supabase Connected</span>
         </div>
         
         <button 

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { Database, RefreshCw, AlertTriangle, Check, Copy, Download, Upload, ShieldCheck, HardDrive } from 'lucide-react';
+import { Database, RefreshCw, Check, Copy, Download, Upload, ShieldCheck, HardDrive } from 'lucide-react';
 import { db } from '../services/db';
 
 interface AdminPanelProps {
-  useSupabase: boolean;
-  onToggleSupabase: (value: boolean) => void;
+  useSupabase?: boolean;
+  onToggleSupabase?: (value: boolean) => void;
   onResetDatabase: () => Promise<void>;
   onRefreshData?: () => Promise<void>;
   statusMessage?: { type: 'success' | 'error'; text: string } | null;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
-  useSupabase,
-  onToggleSupabase,
+  useSupabase: _useSupabase,
+  onToggleSupabase: _onToggleSupabase,
   onResetDatabase,
   onRefreshData,
   statusMessage
@@ -170,58 +170,23 @@ CREATE POLICY "Public Read/Write Enrollments" ON enrollments FOR ALL USING (true
         </div>
       </section>
 
-      {/* Database Engine Selector */}
+      {/* Database Engine Status */}
       <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <Database size={18} className="text-[var(--text-secondary)] mt-0.5" />
+          <Database size={18} className="text-emerald-400 mt-0.5" />
           <div>
-            <h2 className="text-sm font-bold text-[var(--text-primary)]">Database Engine Selector</h2>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">Select your connection provider for CTSpace data storage.</p>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Supabase Engine Active</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">CTSpace is exclusively configured with remote Supabase PostgreSQL persistence.</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div 
-            className={`p-4 rounded-lg border transition cursor-pointer flex items-start gap-3 ${
-              !useSupabase 
-                ? 'bg-[var(--bg-active)] border-[var(--text-secondary)] shadow-sm' 
-                : 'bg-[var(--bg-card-hover)] border-[var(--border-color)] hover:border-[var(--border-color-hover)]'
-            }`} 
-            onClick={() => onToggleSupabase(false)}
-          >
-            <div className={`w-3.5 h-3.5 rounded-full border shrink-0 mt-1 flex items-center justify-center ${!useSupabase ? 'border-[var(--text-primary)]' : 'border-[var(--border-color)]'}`}>
-              {!useSupabase && <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />}
-            </div>
-            <div>
-              <h3 className="text-xs font-bold text-[var(--text-primary)]">Free Local Browser DB (Recommended)</h3>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">100% free forever. Stores data locally in your browser. Zero setup required.</p>
-            </div>
-          </div>
-
-          <div 
-            className={`p-4 rounded-lg border transition cursor-pointer flex items-start gap-3 ${
-              useSupabase 
-                ? 'bg-[var(--bg-active)] border-[var(--text-secondary)] shadow-sm' 
-                : 'bg-[var(--bg-card-hover)] border-[var(--border-color)] hover:border-[var(--border-color-hover)]'
-            }`} 
-            onClick={() => onToggleSupabase(true)}
-          >
-            <div className={`w-3.5 h-3.5 rounded-full border shrink-0 mt-1 flex items-center justify-center ${useSupabase ? 'border-[var(--text-primary)]' : 'border-[var(--border-color)]'}`}>
-              {useSupabase && <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />}
-            </div>
-            <div>
-              <h3 className="text-xs font-bold text-[var(--text-primary)]">Supabase Client (Free Cloud Tier)</h3>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">Connects to a remote PostgreSQL server. Requires free Supabase credentials.</p>
-            </div>
+        <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex items-center gap-3">
+          <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0" />
+          <div className="flex-1">
+            <h3 className="text-xs font-bold text-[var(--text-primary)]">Supabase Client Connected</h3>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Real-time CRUD operations, student rosters, curriculum, and course instances are managed directly via Supabase PostgreSQL.</p>
           </div>
         </div>
-
-        {useSupabase && (
-          <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 p-3 rounded-md text-xs text-amber-400">
-            <AlertTriangle size={14} className="shrink-0" />
-            <span>Make sure SUPABASE_URL and SUPABASE_ANON_KEY are present in your environment variables.</span>
-          </div>
-        )}
       </section>
 
       {/* Backup & Data Management */}
@@ -270,7 +235,7 @@ CREATE POLICY "Public Read/Write Enrollments" ON enrollments FOR ALL USING (true
 
         <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed flex-1">Erase local workspace modifications and restore curriculum and roster initial default values.</p>
-          <button className="px-4 py-2 rounded-md border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer shrink-0" onClick={handleReset} disabled={resetting || useSupabase}>
+          <button className="px-4 py-2 rounded-md border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition cursor-pointer shrink-0" onClick={handleReset} disabled={resetting}>
             {resetting ? 'Resetting...' : 'Reset to Default Seeds'}
           </button>
         </div>

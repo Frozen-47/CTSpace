@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, User, Mail, BookOpen, Trash2, Edit, Award, MapPin, GraduationCap, ChevronDown, ChevronUp, Phone, Calendar, Droplet, FileText, ExternalLink } from 'lucide-react';
+import { Search, Plus, User, Mail, Trash2, Edit, Award, MapPin, GraduationCap, ChevronDown, ChevronUp, Phone, Calendar, Droplet, FileText, ExternalLink, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 import { CLASS_GROUPS, type Course, type Instructor, type Student, type ClassInstance, type Enrollment } from '../mock/mockData';
 
 const GithubIcon: React.FC<{ size?: number }> = ({ size = 12 }) => (
@@ -52,6 +52,7 @@ export const Directory: React.FC<DirectoryProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   const [studentClassFilter, setStudentClassFilter] = useState('all');
+  const [feeStatusFilter, setFeeStatusFilter] = useState('all');
 
   const toggleStudentExpand = (studentId: string) => {
     setExpandedStudentId(expandedStudentId === studentId ? null : studentId);
@@ -108,15 +109,17 @@ export const Directory: React.FC<DirectoryProps> = ({
       (s.linkedin && s.linkedin.toLowerCase().includes(q));
       
     const matchesClass = studentClassFilter === 'all' || s.classGroup === studentClassFilter;
-    return matchesSearch && matchesClass;
+    const matchesFee = feeStatusFilter === 'all' || (s.feeStatus || 'Paid') === feeStatusFilter;
+
+    return matchesSearch && matchesClass && matchesFee;
   });
 
   return (
     <div className="flex flex-col animate-fade-in pb-12">
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Directory</h1>
-          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Department profiles, student profiles, GitHub accounts & academic records.</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Student Directory & Academic Database</h1>
+          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Student Profiles, 10th/11th/12th Marks, Fee Payment Status & Social Accounts.</p>
         </div>
         <div>
           {activeTab === 'faculty' ? (
@@ -127,13 +130,13 @@ export const Directory: React.FC<DirectoryProps> = ({
           ) : (
             <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer shadow-sm" onClick={onAddStudent}>
               <Plus size={15} />
-              Add Student
+              Add Student Record
             </button>
           )}
         </div>
       </header>
 
-      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-4 mb-6 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-1.5 bg-[var(--bg-card-hover)] p-1 rounded-lg border border-[var(--border-color)]">
           <button 
             className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer ${
@@ -157,20 +160,34 @@ export const Directory: React.FC<DirectoryProps> = ({
           </button>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
           {activeTab === 'students' && (
-            <select
-              className="px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs font-medium outline-none focus:border-[var(--text-secondary)] transition"
-              value={studentClassFilter}
-              onChange={(e) => setStudentClassFilter(e.target.value)}
-            >
-              <option value="all">All Batches</option>
-              {CLASS_GROUPS.map(cg => (
-                <option key={cg} value={cg}>{cg}</option>
-              ))}
-            </select>
+            <>
+              <select
+                className="px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs font-medium outline-none focus:border-[var(--text-secondary)] transition"
+                value={studentClassFilter}
+                onChange={(e) => setStudentClassFilter(e.target.value)}
+              >
+                <option value="all">All Batches</option>
+                {CLASS_GROUPS.map(cg => (
+                  <option key={cg} value={cg}>{cg}</option>
+                ))}
+              </select>
+
+              <select
+                className="px-3 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-primary)] text-xs font-medium outline-none focus:border-[var(--text-secondary)] transition"
+                value={feeStatusFilter}
+                onChange={(e) => setFeeStatusFilter(e.target.value)}
+              >
+                <option value="all">All Fee Status</option>
+                <option value="Paid">Fee Paid</option>
+                <option value="Partial">Partial Paid</option>
+                <option value="Pending">Pending Fees</option>
+              </select>
+            </>
           )}
-          <div className="relative flex-1 md:w-72">
+
+          <div className="relative flex-1 lg:w-64">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
@@ -204,49 +221,37 @@ export const Directory: React.FC<DirectoryProps> = ({
                     <div className="flex flex-col gap-2 text-xs text-[var(--text-secondary)] border-y border-[var(--border-color)] py-3">
                       <div className="flex items-center gap-2">
                         <Mail size={12} className="text-[var(--text-muted)]" />
-                        <a href={`mailto:${inst.email}`} className="hover:text-[var(--text-primary)] hover:underline truncate">{inst.email}</a>
+                        <span>{inst.email}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin size={12} className="text-[var(--text-muted)]" />
-                        <span>Office: {inst.office || 'TBD'}</span>
+                        <span>Office: {inst.office}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Award size={12} className="text-[var(--text-muted)]" />
-                        <span className="truncate">Research: {inst.specialization}</span>
+                        <span>Spec: {inst.specialization}</span>
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <h4 className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Assigned Courses ({taughtClasses.length})</h4>
-                      {taughtClasses.length > 0 ? (
-                        <div className="flex flex-col gap-1.5">
-                          {taughtClasses.map(c => (
-                            <div key={c.id} className="text-xs p-2 rounded bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-secondary)]">
-                              <strong className="text-[var(--text-primary)]">{c.code}</strong>: Room {c.room} ({c.days} {c.time})
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-[var(--text-muted)] italic">No active courses.</span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-color)]">
-                      <button className="flex-1 py-1.5 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer" onClick={() => onEditInstructor(inst)}>
-                        <Edit size={12} />
-                        Edit
-                      </button>
-                      <button className="py-1.5 px-3 rounded-md border border-[var(--border-color)] bg-transparent hover:bg-rose-500/10 text-rose-400 border-rose-500/20 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer" onClick={() => onDeleteInstructor(inst.id)}>
-                        <Trash2 size={12} />
-                        Remove
-                      </button>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs text-[var(--text-muted)] font-medium">{taughtClasses.length} Scheduled Sections</span>
+                      <div className="flex items-center gap-1">
+                        <button className="p-1.5 rounded-md hover:bg-[var(--bg-card-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer" onClick={() => onEditInstructor(inst)} title="Edit">
+                          <Edit size={13} />
+                        </button>
+                        <button className="p-1.5 rounded-md hover:bg-rose-500/10 text-rose-400 transition cursor-pointer" onClick={() => onDeleteInstructor(inst.id)} title="Delete">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
               })
             ) : (
-              <div className="col-span-full p-8 text-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-muted)]">
-                <p>No faculty records match your criteria.</p>
+              <div className="col-span-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-12 flex flex-col items-center justify-center text-center">
+                <User size={36} className="text-[var(--text-muted)] mb-3" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">No faculty found</h3>
+                <p className="text-xs text-[var(--text-secondary)]">Try refining your search terms.</p>
               </div>
             )}
           </div>
@@ -256,6 +261,11 @@ export const Directory: React.FC<DirectoryProps> = ({
               filteredStudents.map(student => {
                 const isExpanded = expandedStudentId === student.id;
                 const studentEnrollments = getStudentEnrollments(student.id);
+                const status = student.feeStatus || 'Paid';
+                const totalF = student.totalFee ?? 45000;
+                const paidF = student.paidAmount ?? 45000;
+                const dueF = Math.max(0, totalF - paidF);
+
                 return (
                   <div key={student.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--border-color-hover)] rounded-xl overflow-hidden transition shadow-sm">
                     <div className="flex flex-col md:flex-row md:items-center justify-between p-4 cursor-pointer hover:bg-[var(--bg-card-hover)] transition gap-3" onClick={() => toggleStudentExpand(student.id)}>
@@ -273,6 +283,19 @@ export const Directory: React.FC<DirectoryProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap">
+                        {/* Fee Status Chip */}
+                        <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded border ${
+                          status === 'Paid'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
+                            : status === 'Partial'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                            : 'bg-rose-500/10 text-rose-400 border-rose-500/25'
+                        }`}>
+                          <CreditCard size={11} />
+                          <span>Fee: {status}</span>
+                          {status === 'Partial' && <span className="opacity-80"> (₹{paidF.toLocaleString()})</span>}
+                        </span>
+
                         {student.github && (
                           <a 
                             href={student.github.startsWith('http') ? student.github : `https://${student.github}`} 
@@ -305,11 +328,6 @@ export const Directory: React.FC<DirectoryProps> = ({
                             {student.bloodGroup}
                           </span>
                         )}
-                        {student.medium && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded text-blue-400 bg-blue-500/10 border border-blue-500/25">
-                            {student.medium}
-                          </span>
-                        )}
                         <div className="text-[11px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-card-hover)] border border-[var(--border-color)] px-2 py-0.5 rounded">
                           <span>{student.classGroup}</span>
                         </div>
@@ -329,9 +347,36 @@ export const Directory: React.FC<DirectoryProps> = ({
                     </div>
 
                     {isExpanded && (
-                      <div className="border-t border-[var(--border-color)] bg-[var(--bg-card-hover)] p-4 md:p-5 animate-fade-in">
-                        {/* Student Details Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 mb-4 bg-[var(--bg-card)] p-3 rounded-lg border border-[var(--border-color)]">
+                      <div className="border-t border-[var(--border-color)] bg-[var(--bg-card-hover)] p-4 md:p-5 animate-fade-in flex flex-col gap-4">
+                        {/* Fee Details Banner */}
+                        <div className="bg-[var(--bg-card)] p-3.5 rounded-lg border border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`p-2 rounded-lg ${
+                              status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : status === 'Partial' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            }`}>
+                              <CreditCard size={18} />
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                <span>Fee Status: {status}</span>
+                                {status === 'Paid' && <CheckCircle2 size={13} className="text-emerald-400" />}
+                                {status === 'Pending' && <AlertCircle size={13} className="text-rose-400" />}
+                              </h4>
+                              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                                Total Tuition Fee: ₹{totalF.toLocaleString()} • Paid: ₹{paidF.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--text-muted)]">Outstanding Balance</span>
+                            <div className={`text-sm font-extrabold ${dueF > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                              ₹{dueF.toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Student Marks & Personal Details Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 bg-[var(--bg-card)] p-3 rounded-lg border border-[var(--border-color)]">
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] font-medium text-[var(--text-muted)] flex items-center gap-1"><FileText size={11} /> Roll Number</span>
                             <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{student.rollNo || 'N/A'}</span>
@@ -394,57 +439,33 @@ export const Directory: React.FC<DirectoryProps> = ({
                           </div>
                         </div>
 
-                        <div className="flex justify-between items-center mb-3 mt-4">
+                        <div className="flex justify-between items-center mb-1">
                           <h4 className="text-xs font-bold text-[var(--text-primary)]">Course Registrations</h4>
                           <button className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition cursor-pointer" onClick={() => onAddEnrollment(student.id)}>
                             <Plus size={12} />
-                            Register Class
+                            Enroll Course
                           </button>
                         </div>
 
                         {studentEnrollments.length > 0 ? (
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-left">
-                              <thead>
-                                <tr className="border-b border-[var(--border-color)]">
-                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Course</th>
-                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Schedule</th>
-                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Room</th>
-                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2">Grade</th>
-                                  <th className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider p-2 text-right">Actions</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {studentEnrollments.map(enr => (
-                                  <tr key={enr.enrollmentId} className="border-b border-[var(--border-color)] last:border-none">
-                                    <td className="p-2 text-xs text-[var(--text-secondary)]">
-                                      <strong className="text-[var(--text-primary)]">{enr.code}</strong>: {enr.name}
-                                    </td>
-                                    <td className="p-2 text-xs text-[var(--text-secondary)]">{enr.days} ({enr.time})</td>
-                                    <td className="p-2 text-xs text-[var(--text-secondary)]">{enr.room}</td>
-                                    <td className="p-2 text-xs">
-                                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${enr.grade === 'IP' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
-                                        {enr.grade === 'IP' ? 'In Progress' : enr.grade}
-                                      </span>
-                                    </td>
-                                    <td className="p-2 text-xs text-right">
-                                      <button 
-                                        className="text-xs text-rose-400 hover:underline bg-transparent border-none font-medium cursor-pointer" 
-                                        onClick={() => onDeleteEnrollment(enr.enrollmentId)}
-                                      >
-                                        Drop
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                            {studentEnrollments.map(enr => (
+                              <div key={enr.enrollmentId} className="bg-[var(--bg-card)] border border-[var(--border-color)] p-3 rounded-lg flex items-center justify-between text-xs">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-[var(--text-primary)]">{enr.code}</span>
+                                    <span className="text-[11px] font-semibold text-emerald-400">({enr.grade})</span>
+                                  </div>
+                                  <span className="text-[11px] text-[var(--text-secondary)] block truncate max-w-[180px]">{enr.name}</span>
+                                </div>
+                                <button className="p-1 rounded text-rose-400 hover:bg-rose-500/10 transition cursor-pointer" onClick={() => onDeleteEnrollment(enr.enrollmentId)} title="Remove Enrollment">
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            ))}
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center justify-center p-6 text-[var(--text-muted)] text-xs gap-1.5">
-                            <BookOpen size={18} />
-                            <p>No active registrations.</p>
-                          </div>
+                          <p className="text-xs text-[var(--text-muted)] italic">No active course registrations for this student.</p>
                         )}
                       </div>
                     )}
@@ -452,8 +473,10 @@ export const Directory: React.FC<DirectoryProps> = ({
                 );
               })
             ) : (
-              <div className="p-8 text-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-muted)]">
-                <p>No student records match your criteria.</p>
+              <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-12 flex flex-col items-center justify-center text-center">
+                <GraduationCap size={36} className="text-[var(--text-muted)] mb-3" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">No student records found</h3>
+                <p className="text-xs text-[var(--text-secondary)]">Try refining your search terms or filters.</p>
               </div>
             )}
           </div>

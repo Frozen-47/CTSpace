@@ -5,7 +5,7 @@ import {
   INITIAL_COURSES, INITIAL_INSTRUCTORS, INITIAL_STUDENTS, INITIAL_CLASSES, INITIAL_ENROLLMENTS
 } from '../mock/mockData';
 
-// Initialize Supabase client if URL and Anon Key are provided
+// Initialize Supabase client
 let supabase: any = null;
 if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
   try {
@@ -14,27 +14,6 @@ if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
     console.error("Failed to initialize Supabase client:", error);
   }
 }
-
-// Dynamic helper to check if Supabase should be used
-const useSupabase = () => SUPABASE_CONFIG.getUseSupabase() && supabase !== null;
-
-// Local Storage helpers for mock mode
-const getLocal = <T>(key: string, seed: T[]): T[] => {
-  const data = localStorage.getItem(`ctspace_${key}`);
-  if (data === null) {
-    localStorage.setItem(`ctspace_${key}`, JSON.stringify(seed));
-    return seed;
-  }
-  try {
-    return JSON.parse(data);
-  } catch {
-    return seed;
-  }
-};
-
-const setLocal = <T>(key: string, data: T[]) => {
-  localStorage.setItem(`ctspace_${key}`, JSON.stringify(data));
-};
 
 // --- Time & Conflict Helpers ---
 
@@ -76,13 +55,10 @@ export function checkSchedulingConflict(
   existingClasses: ClassInstance[]
 ): { conflict: boolean; type?: 'instructor' | 'room' | 'classGroup'; message?: string } {
   for (const cls of existingClasses) {
-    // Ignore self if editing
     if (classId && cls.id === classId) continue;
     
-    // Check if the term and schedule days overlap
     if (cls.term === term && days.some(d => cls.scheduleDays.includes(d))) {
       if (timesOverlap(cls.scheduleTime, time)) {
-        // Instructor conflict
         if (cls.instructorId === instructorId) {
           return {
             conflict: true,
@@ -90,7 +66,6 @@ export function checkSchedulingConflict(
             message: `Instructor is already scheduled for another class during this timeslot (${cls.scheduleTime} on ${cls.scheduleDays.join('/')}).`
           };
         }
-        // Room conflict
         if (cls.room.toLowerCase() === room.toLowerCase()) {
           return {
             conflict: true,
@@ -98,7 +73,6 @@ export function checkSchedulingConflict(
             message: `Room "${cls.room}" is already booked for another class during this timeslot.`
           };
         }
-        // Class group conflict
         if (cls.classGroup === classGroup) {
           return {
             conflict: true,
@@ -131,7 +105,11 @@ const mapStudentFromDb = (row: any): Student => ({
   phone: row.phone,
   linkedin: row.linkedin,
   github: row.github,
-  projectDrive: row.project_drive || row.projectDrive
+  projectDrive: row.project_drive || row.projectDrive,
+  feeStatus: row.fee_status || row.feeStatus || 'Paid',
+  totalFee: row.total_fee ?? row.totalFee ?? 45000,
+  paidAmount: row.paid_amount ?? row.paidAmount ?? 45000,
+  dueDate: row.due_date || row.dueDate || 'Cleared'
 });
 
 const mapStudentToDb = (s: Partial<Student>) => {
@@ -144,6 +122,10 @@ const mapStudentToDb = (s: Partial<Student>) => {
   if (payload.mark12 !== undefined) { payload.mark_12 = payload.mark12; delete payload.mark12; }
   if (payload.bloodGroup !== undefined) { payload.blood_group = payload.bloodGroup; delete payload.bloodGroup; }
   if (payload.projectDrive !== undefined) { payload.project_drive = payload.projectDrive; delete payload.projectDrive; }
+  if (payload.feeStatus !== undefined) { payload.fee_status = payload.feeStatus; delete payload.feeStatus; }
+  if (payload.totalFee !== undefined) { payload.total_fee = payload.totalFee; delete payload.totalFee; }
+  if (payload.paidAmount !== undefined) { payload.paid_amount = payload.paidAmount; delete payload.paidAmount; }
+  if (payload.dueDate !== undefined) { payload.due_date = payload.dueDate; delete payload.dueDate; }
   return payload;
 };
 
@@ -183,22 +165,52 @@ const mapEnrollmentToDb = (e: Partial<Enrollment>) => {
   return payload;
 };
 
-// --- Database Operations ---
+// Auto-seed empty Supabase tables
+const fetchOrSeedTable = async (tableName: string, mapToDbFn: (item: any) => any, seedData: any[]) => {
+  if (!supabase) return seedData;
+  try {
+    const { data, error } = await supabase.from(tableName).select('*');
+    if (!error && data && data.length > 0) {
+      return data;
+    }
+    // Table empty or missing - attempt seed insertion
+    const payload = seedData.map(mapToDbFn);
+    const { error: seedError } = await supabase.from(tableName).insert(payload);
+    if (!seedError) {
+      const { data: fresh } = await supabase.from(tableName).select('*');
+      if (fresh && fresh.length > 0) return fresh;
+    }
+  } catch (err) {
+    console.warn(`Supabase ${tableName} query error, utilizing initial data:`, err);
+  }
+  return seedData;
+};
+
+// --- Exclusive Supabase Database Service ---
 
 export const db = {
-  // Reset database to initial seeds
+  // Re-seed Supabase tables
   resetDatabase: async (): Promise<void> => {
-    if (useSupabase()) {
-      console.warn("Reset operation is only available in mock mode.");
+    if (!supabase) return;
+    try {
+      await supabase.from('enrollments').delete().neq('id', '0');
+      await supabase.from('classes').delete().neq('id', '0');
+      await supabase.from('students').delete().neq('id', '0');
+      await supabase.from('instructors').delete().neq('id', '0');
+      await supabase.from('courses').delete().neq('id', '0');
+
+      await supabase.from('courses').insert(INITIAL_COURSES);
+      await supabase.from('instructors').insert(INITIAL_INSTRUCTORS);
+      await supabase.from('students').insert(INITIAL_STUDENTS.map(mapStudentToDb));
+      await supabase.from('classes').insert(INITIAL_CLASSES.map(mapClassToDb));
+      await supabase.from('enrollments').insert(INITIAL_ENROLLMENTS.map(mapEnrollmentToDb));
+    } catch (err) {
+      console.error("Supabase database reset error:", err);
+      throw err;
     }
-    localStorage.removeItem('ctspace_courses');
-    localStorage.removeItem('ctspace_instructors');
-    localStorage.removeItem('ctspace_students');
-    localStorage.removeItem('ctspace_classes');
-    localStorage.removeItem('ctspace_enrollments');
   },
 
-  // Export full database state as a JSON string
+  // Export database JSON
   exportDatabaseJSON: async (): Promise<string> => {
     const data = {
       courses: await db.getCourses(),
@@ -212,192 +224,112 @@ export const db = {
     return JSON.stringify(data, null, 2);
   },
 
-  // Import full database state from JSON
+  // Import database JSON directly to Supabase
   importDatabaseJSON: async (jsonString: string): Promise<void> => {
-    try {
-      const parsed = JSON.parse(jsonString);
-      if (!parsed || typeof parsed !== 'object') {
-        throw new Error('Invalid JSON format.');
-      }
-      if (Array.isArray(parsed.courses)) setLocal('courses', parsed.courses);
-      if (Array.isArray(parsed.instructors)) setLocal('instructors', parsed.instructors);
-      if (Array.isArray(parsed.students)) setLocal('students', parsed.students);
-      if (Array.isArray(parsed.classes)) setLocal('classes', parsed.classes);
-      if (Array.isArray(parsed.enrollments)) setLocal('enrollments', parsed.enrollments);
-    } catch (err: any) {
-      throw new Error(`Failed to parse database backup file: ${err.message}`);
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const parsed = JSON.parse(jsonString);
+    if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON format.');
+
+    if (Array.isArray(parsed.courses) && parsed.courses.length > 0) {
+      await supabase.from('courses').upsert(parsed.courses);
+    }
+    if (Array.isArray(parsed.instructors) && parsed.instructors.length > 0) {
+      await supabase.from('instructors').upsert(parsed.instructors);
+    }
+    if (Array.isArray(parsed.students) && parsed.students.length > 0) {
+      await supabase.from('students').upsert(parsed.students.map(mapStudentToDb));
+    }
+    if (Array.isArray(parsed.classes) && parsed.classes.length > 0) {
+      await supabase.from('classes').upsert(parsed.classes.map(mapClassToDb));
+    }
+    if (Array.isArray(parsed.enrollments) && parsed.enrollments.length > 0) {
+      await supabase.from('enrollments').upsert(parsed.enrollments.map(mapEnrollmentToDb));
     }
   },
 
   // Courses CRUD
   getCourses: async (): Promise<Course[]> => {
-    if (useSupabase()) {
-      const { data, error } = await supabase.from('courses').select('*').order('code');
-      if (error) throw error;
-      return data;
-    }
-    return getLocal<Course>('courses', INITIAL_COURSES).sort((a, b) => a.code.localeCompare(b.code));
+    const raw = await fetchOrSeedTable('courses', item => item, INITIAL_COURSES);
+    return raw.sort((a: Course, b: Course) => a.code.localeCompare(b.code));
   },
 
   saveCourse: async (course: Omit<Course, 'id'> & { id?: string }): Promise<Course> => {
-    if (useSupabase()) {
-      if (course.id) {
-        const { data, error } = await supabase.from('courses').update(course).eq('id', course.id).select().single();
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await supabase.from('courses').insert(course).select().single();
-        if (error) throw error;
-        return data;
-      }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    if (course.id) {
+      const { data, error } = await supabase.from('courses').update(course).eq('id', course.id).select().single();
+      if (error) throw error;
+      return data;
     } else {
-      const courses = getLocal<Course>('courses', INITIAL_COURSES);
-      let finalCourse: Course;
-      if (course.id) {
-        finalCourse = course as Course;
-        const index = courses.findIndex(c => c.id === course.id);
-        if (index !== -1) courses[index] = finalCourse;
-      } else {
-        finalCourse = { ...course, id: 'c-' + Date.now() } as Course;
-        courses.push(finalCourse);
-      }
-      setLocal('courses', courses);
-      return finalCourse;
+      const { data, error } = await supabase.from('courses').insert(course).select().single();
+      if (error) throw error;
+      return data;
     }
   },
 
   deleteCourse: async (id: string): Promise<void> => {
-    if (useSupabase()) {
-      const { error } = await supabase.from('courses').delete().eq('id', id);
-      if (error) throw error;
-    } else {
-      const courses = getLocal<Course>('courses', INITIAL_COURSES).filter(c => c.id !== id);
-      setLocal('courses', courses);
-      // Delete any dependent classes/enrollments
-      const classes = getLocal<ClassInstance>('classes', INITIAL_CLASSES).filter(cls => cls.courseId !== id);
-      setLocal('classes', classes);
-    }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const { error } = await supabase.from('courses').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // Instructors CRUD
   getInstructors: async (): Promise<Instructor[]> => {
-    if (useSupabase()) {
-      const { data, error } = await supabase.from('instructors').select('*').order('name');
-      if (error) throw error;
-      return data;
-    }
-    return getLocal<Instructor>('instructors', INITIAL_INSTRUCTORS).sort((a, b) => a.name.localeCompare(b.name));
+    const raw = await fetchOrSeedTable('instructors', item => item, INITIAL_INSTRUCTORS);
+    return raw.sort((a: Instructor, b: Instructor) => a.name.localeCompare(b.name));
   },
 
   saveInstructor: async (instructor: Omit<Instructor, 'id'> & { id?: string }): Promise<Instructor> => {
-    if (useSupabase()) {
-      if (instructor.id) {
-        const { data, error } = await supabase.from('instructors').update(instructor).eq('id', instructor.id).select().single();
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await supabase.from('instructors').insert(instructor).select().single();
-        if (error) throw error;
-        return data;
-      }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    if (instructor.id) {
+      const { data, error } = await supabase.from('instructors').update(instructor).eq('id', instructor.id).select().single();
+      if (error) throw error;
+      return data;
     } else {
-      const instructors = getLocal<Instructor>('instructors', INITIAL_INSTRUCTORS);
-      let finalInstructor: Instructor;
-      if (instructor.id) {
-        finalInstructor = instructor as Instructor;
-        const index = instructors.findIndex(i => i.id === instructor.id);
-        if (index !== -1) instructors[index] = finalInstructor;
-      } else {
-        finalInstructor = { ...instructor, id: 'i-' + Date.now() } as Instructor;
-        instructors.push(finalInstructor);
-      }
-      setLocal('instructors', instructors);
-      return finalInstructor;
+      const { data, error } = await supabase.from('instructors').insert(instructor).select().single();
+      if (error) throw error;
+      return data;
     }
   },
 
   deleteInstructor: async (id: string): Promise<void> => {
-    if (useSupabase()) {
-      const { error } = await supabase.from('instructors').delete().eq('id', id);
-      if (error) throw error;
-    } else {
-      const instructors = getLocal<Instructor>('instructors', INITIAL_INSTRUCTORS).filter(i => i.id !== id);
-      setLocal('instructors', instructors);
-      // Nullify or delete classes scheduled with this instructor
-      const classes = getLocal<ClassInstance>('classes', INITIAL_CLASSES).filter(cls => cls.instructorId !== id);
-      setLocal('classes', classes);
-    }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const { error } = await supabase.from('instructors').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // Students CRUD
   getStudents: async (): Promise<Student[]> => {
-    if (useSupabase()) {
-      const { data, error } = await supabase.from('students').select('*').order('name');
-      if (error) throw error;
-      return (data || []).map(mapStudentFromDb);
-    }
-    const local = getLocal<Student>('students', INITIAL_STUDENTS);
-    // If local storage has fewer than 34 students or old schema without github/rollNo, update it to initial seeds
-    if (!local || local.length < 34 || !local.some(s => s.github)) {
-      setLocal('students', INITIAL_STUDENTS);
-      return INITIAL_STUDENTS;
-    }
-    return local;
+    const raw = await fetchOrSeedTable('students', mapStudentToDb, INITIAL_STUDENTS);
+    return (raw || []).map(mapStudentFromDb);
   },
 
   saveStudent: async (student: Omit<Student, 'id'> & { id?: string }): Promise<Student> => {
-    if (useSupabase()) {
-      const payload = mapStudentToDb(student);
-      if (student.id) {
-        const { data, error } = await supabase.from('students').update(payload).eq('id', student.id).select().single();
-        if (error) throw error;
-        return mapStudentFromDb(data);
-      } else {
-        const { data, error } = await supabase.from('students').insert(payload).select().single();
-        if (error) throw error;
-        return mapStudentFromDb(data);
-      }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const payload = mapStudentToDb(student);
+    if (student.id) {
+      const { data, error } = await supabase.from('students').update(payload).eq('id', student.id).select().single();
+      if (error) throw error;
+      return mapStudentFromDb(data);
     } else {
-      const students = getLocal<Student>('students', INITIAL_STUDENTS);
-      let finalStudent: Student;
-      if (student.id) {
-        finalStudent = student as Student;
-        const index = students.findIndex(s => s.id === student.id);
-        if (index !== -1) students[index] = finalStudent;
-      } else {
-        finalStudent = { ...student, id: 's-' + Date.now() } as Student;
-        students.push(finalStudent);
-      }
-      setLocal('students', students);
-      return finalStudent;
+      const { data, error } = await supabase.from('students').insert(payload).select().single();
+      if (error) throw error;
+      return mapStudentFromDb(data);
     }
   },
 
   deleteStudent: async (id: string): Promise<void> => {
-    if (useSupabase()) {
-      const { error } = await supabase.from('students').delete().eq('id', id);
-      if (error) throw error;
-    } else {
-      const students = getLocal<Student>('students', INITIAL_STUDENTS).filter(s => s.id !== id);
-      setLocal('students', students);
-      // Delete student enrollments
-      const enrollments = getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS).filter(e => e.studentId !== id);
-      setLocal('enrollments', enrollments);
-    }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const { error } = await supabase.from('students').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // Classes CRUD
   getClasses: async (): Promise<ClassInstance[]> => {
-    if (useSupabase()) {
-      const { data, error } = await supabase.from('classes').select('*');
-      if (error) throw error;
-      return (data || []).map(mapClassFromDb);
-    }
-    return getLocal<ClassInstance>('classes', INITIAL_CLASSES);
+    const raw = await fetchOrSeedTable('classes', mapClassToDb, INITIAL_CLASSES);
+    return (raw || []).map(mapClassFromDb);
   },
 
   saveClass: async (cls: Omit<ClassInstance, 'id'> & { id?: string }): Promise<ClassInstance> => {
-    // Validate conflict before saving
     const existingClasses = await db.getClasses();
     const conflictCheck = checkSchedulingConflict(
       cls.id || null,
@@ -414,91 +346,48 @@ export const db = {
       throw new Error(conflictCheck.message);
     }
 
-    if (useSupabase()) {
-      const payload = mapClassToDb(cls);
-      if (cls.id) {
-        const { data, error } = await supabase.from('classes').update(payload).eq('id', cls.id).select().single();
-        if (error) throw error;
-        return mapClassFromDb(data);
-      } else {
-        const { data, error } = await supabase.from('classes').insert(payload).select().single();
-        if (error) throw error;
-        return mapClassFromDb(data);
-      }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const payload = mapClassToDb(cls);
+    if (cls.id) {
+      const { data, error } = await supabase.from('classes').update(payload).eq('id', cls.id).select().single();
+      if (error) throw error;
+      return mapClassFromDb(data);
     } else {
-      const classes = getLocal<ClassInstance>('classes', INITIAL_CLASSES);
-      let finalClass: ClassInstance;
-      if (cls.id) {
-        finalClass = cls as ClassInstance;
-        const index = classes.findIndex(c => c.id === cls.id);
-        if (index !== -1) classes[index] = finalClass;
-      } else {
-        finalClass = { ...cls, id: 'cls-' + Date.now() } as ClassInstance;
-        classes.push(finalClass);
-      }
-      setLocal('classes', classes);
-      return finalClass;
+      const { data, error } = await supabase.from('classes').insert(payload).select().single();
+      if (error) throw error;
+      return mapClassFromDb(data);
     }
   },
 
   deleteClass: async (id: string): Promise<void> => {
-    if (useSupabase()) {
-      const { error } = await supabase.from('classes').delete().eq('id', id);
-      if (error) throw error;
-    } else {
-      const classes = getLocal<ClassInstance>('classes', INITIAL_CLASSES).filter(c => c.id !== id);
-      setLocal('classes', classes);
-      // Delete enrollments for this class
-      const enrollments = getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS).filter(e => e.classId !== id);
-      setLocal('enrollments', enrollments);
-    }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const { error } = await supabase.from('classes').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // Enrollments CRUD
   getEnrollments: async (): Promise<Enrollment[]> => {
-    if (useSupabase()) {
-      const { data, error } = await supabase.from('enrollments').select('*');
-      if (error) throw error;
-      return (data || []).map(mapEnrollmentFromDb);
-    }
-    return getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS);
+    const raw = await fetchOrSeedTable('enrollments', mapEnrollmentToDb, INITIAL_ENROLLMENTS);
+    return (raw || []).map(mapEnrollmentFromDb);
   },
 
   saveEnrollment: async (enrollment: Omit<Enrollment, 'id'> & { id?: string }): Promise<Enrollment> => {
-    if (useSupabase()) {
-      const payload = mapEnrollmentToDb(enrollment);
-      if (enrollment.id) {
-        const { data, error } = await supabase.from('enrollments').update(payload).eq('id', enrollment.id).select().single();
-        if (error) throw error;
-        return mapEnrollmentFromDb(data);
-      } else {
-        const { data, error } = await supabase.from('enrollments').insert(payload).select().single();
-        if (error) throw error;
-        return mapEnrollmentFromDb(data);
-      }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const payload = mapEnrollmentToDb(enrollment);
+    if (enrollment.id) {
+      const { data, error } = await supabase.from('enrollments').update(payload).eq('id', enrollment.id).select().single();
+      if (error) throw error;
+      return mapEnrollmentFromDb(data);
     } else {
-      const enrollments = getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS);
-      let finalEnrollment: Enrollment;
-      if (enrollment.id) {
-        finalEnrollment = enrollment as Enrollment;
-        const index = enrollments.findIndex(e => e.id === enrollment.id);
-        if (index !== -1) enrollments[index] = finalEnrollment;
-      } else {
-        finalEnrollment = { ...enrollment, id: 'e-' + Date.now() } as Enrollment;
-        enrollments.push(finalEnrollment);
-      }
-      setLocal('enrollments', enrollments);
-      return finalEnrollment;
+      const { data, error } = await supabase.from('enrollments').insert(payload).select().single();
+      if (error) throw error;
+      return mapEnrollmentFromDb(data);
     }
   },
 
   deleteEnrollment: async (id: string): Promise<void> => {
-    if (useSupabase()) {
-      const { error } = await supabase.from('enrollments').delete().eq('id', id);
-      if (error) throw error;
-    } else {
-      const enrollments = getLocal<Enrollment>('enrollments', INITIAL_ENROLLMENTS).filter(e => e.id !== id);
-      setLocal('enrollments', enrollments);
-    }
+    if (!supabase) throw new Error("Supabase client not initialized.");
+    const { error } = await supabase.from('enrollments').delete().eq('id', id);
+    if (error) throw error;
   }
 };

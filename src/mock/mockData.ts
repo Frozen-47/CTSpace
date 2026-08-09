@@ -41,6 +41,11 @@ export interface Student {
   linkedin?: string;
   github?: string;
   projectDrive?: string;
+  // Fee Payment Details
+  feeStatus?: 'Paid' | 'Pending' | 'Partial';
+  totalFee?: number;
+  paidAmount?: number;
+  dueDate?: string;
 }
 
 export interface ClassInstance {
@@ -48,8 +53,8 @@ export interface ClassInstance {
   courseId: string;
   instructorId: string;
   room: string;
-  scheduleDays: string[]; // e.g., ['Monday', 'Wednesday']
-  scheduleTime: string; // e.g., '10:00 AM - 11:30 AM'
+  scheduleDays: string[];
+  scheduleTime: string;
   capacity: number;
   term: string;
   classGroup: ClassGroupType;
@@ -59,7 +64,7 @@ export interface Enrollment {
   id: string;
   studentId: string;
   classId: string;
-  grade: string; // e.g., 'A', 'B', 'IP' (In Progress)
+  grade: string;
 }
 
 export const INITIAL_COURSES: Course[] = [
@@ -67,54 +72,47 @@ export const INITIAL_COURSES: Course[] = [
     id: 'c-1',
     code: 'CS-101',
     name: 'Introduction to Computer Science',
-    description: 'An introduction to computation, problem-solving, and programming using Python. Topics include variables, control structures, functions, and basic data structures.',
+    description: 'An introduction to computation, problem-solving, and programming using Python.',
     credits: 4,
   },
   {
     id: 'c-2',
     code: 'CS-201',
     name: 'Data Structures and Algorithms',
-    description: 'Fundamental data structures including lists, stacks, queues, trees, and graphs. Analysis of algorithms, sorting, searching, and complexity theory.',
+    description: 'Analysis of algorithms, sorting, searching, and complexity theory.',
     credits: 4,
   },
   {
     id: 'c-3',
     code: 'CS-302',
     name: 'Database Systems',
-    description: 'Relational database design, SQL queries, transaction management, indexing, schema refinement, and physical database design.',
+    description: 'Relational database design, SQL queries, and transaction management.',
     credits: 3,
   },
   {
     id: 'c-4',
     code: 'CS-355',
     name: 'Software Engineering',
-    description: 'Principles, methods, and tools for designing, implementing, testing, and maintaining large-scale software systems in teams.',
+    description: 'Principles and tools for designing and implementing software systems.',
     credits: 4,
   },
   {
     id: 'c-5',
     code: 'CS-401',
     name: 'Artificial Intelligence',
-    description: 'Foundations of AI: state-space search, heuristic algorithms, logic representation, planning, neural networks, and introductory machine learning.',
+    description: 'Foundations of AI: state-space search, neural networks, and machine learning.',
     credits: 3,
   },
-  {
-    id: 'c-6',
-    code: 'CS-485',
-    name: 'Computer Networks',
-    description: 'Concepts and architecture of computer communication networks, focusing on the TCP/IP protocol suite, routing algorithms, and socket programming.',
-    credits: 3,
-  }
 ];
 
 export const INITIAL_INSTRUCTORS: Instructor[] = [
   {
     id: 'i-1',
-    name: 'Dr. Evelyn Wright',
-    email: 'e.wright@university.edu',
+    name: 'Dr. Alan Turing',
+    email: 'a.turing@university.edu',
     office: 'Tech Hall 402',
-    title: 'Professor & Department Chair',
-    specialization: 'Artificial Intelligence & Computer Vision',
+    title: 'Professor',
+    specialization: 'Artificial Intelligence & Machine Learning',
   },
   {
     id: 'i-2',
@@ -138,45 +136,45 @@ export const INITIAL_INSTRUCTORS: Instructor[] = [
     email: 's.patel@university.edu',
     office: 'Tech Hall 314',
     title: 'Lecturer',
-    specialization: 'Software Engineering & Human-Computer Interaction',
+    specialization: 'Software Engineering & HCI',
   }
 ];
 
 export const INITIAL_STUDENTS: Student[] = [
-  { id: 's-1', sNo: 1, rollNo: '22CT24038', name: 'Akash V', email: 'akasha09960@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '59%', mark11: '64%', mark12: '72%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B+VE', dob: '12.11.2007', phone: '9629346096', linkedin: 'https://www.linkedin.com/in/akash-v-8131a0321', github: 'https://github.com/AkashV-V' },
-  { id: 's-2', sNo: 2, rollNo: '22CT24007', name: 'Bharathi nesan M', email: 'nesan262936@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '58%', mark11: '78%', mark12: '87%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '23.09.2006', phone: '6374453817', linkedin: 'https://www.linkedin.com/in/bharathi-nesan-aa0049317', github: 'https://github.com/bharathi925' },
-  { id: 's-3', sNo: 3, rollNo: '22CT24010', name: 'Buvanesh M', email: 'buvanesh2309@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '50%', mark11: '60%', mark12: '57%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B+VE', dob: '23.09.2006', phone: '9080570836', linkedin: 'https://www.linkedin.com/in/buvanesh-b-253588315', github: 'https://github.com/BUVANESH2006' },
-  { id: 's-4', sNo: 4, rollNo: '22CT24008', name: 'Boomes N', email: 'boomesnallasivam06@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '77%', mark11: '60%', mark12: '63%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '27.08.2006', phone: '8524044264', linkedin: 'https://www.linkedin.com/in/boomes-nallasivam-911282317', github: 'https://github.com/Boomesh006' },
-  { id: 's-5', sNo: 5, rollNo: '22CT24025', name: 'Charuhasini J', email: 'charuhasinijothikumar@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '49%', mark11: '55%', mark12: '58%', group: 'arts', medium: 'English', bloodGroup: 'B+VE', dob: '01.12.2006', phone: '9363641697', linkedin: '', github: 'https://github.com/charuhasini07' },
-  { id: 's-6', sNo: 6, rollNo: '22CT24021', name: 'Devan R', email: 'devandevan80162@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '59%', mark11: '55%', mark12: '61%', group: 'maths, biology', medium: 'English', bloodGroup: 'O+VE', dob: '13.11.2004', phone: '9342893168', linkedin: 'https://www.linkedin.com/in/devan-r-9b257a304', github: 'https://github.com/Devan3405' },
-  { id: 's-7', sNo: 7, rollNo: '22CT24028', name: 'Dharmar S', email: 'gukan2711@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '40%', mark11: '53%', mark12: '48%', group: 'Biology,Computer science', medium: 'Tamil', bloodGroup: 'B+VE', dob: '27.11.2006', phone: '8098667074', linkedin: 'https://www.linkedin.com/in/gukan-gugan-9b3282317', github: 'https://github.com/Gukan-89' },
-  { id: 's-8', sNo: 8, rollNo: '22CT24024', name: 'Gowtham R', email: 'gowthamram1211@outlook.com', classGroup: '3rd CT (2024-2027)', mark10: '59%', mark11: '68%', mark12: '75%', group: 'Arts,history,acc,eco,commerce', medium: 'Tamil', bloodGroup: 'O+VE', dob: '28.02.2007', phone: '6379323168', linkedin: 'https://www.linkedin.com/in/s-gowtham-476047317', github: 'https://github.com/gowtham508' },
-  { id: 's-9', sNo: 9, rollNo: '22CT24034', name: 'Gowtham S', email: 'gowtham.s.63793231@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '53%', mark11: '67%', mark12: '73%', group: 'arts', medium: 'Tamil', bloodGroup: 'A+VE', dob: '28.02.2007', phone: '9043328254', linkedin: 'https://www.linkedin.com/in/gowtham-ram-036b2131a', github: 'https://github.com/Gowtham12112006' },
-  { id: 's-10', sNo: 10, rollNo: '22CT24004', name: 'Hari S', email: 'harism0220@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '76%', mark11: '59%', mark12: '69%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B+VE', dob: '02.10.2006', phone: '9865471935', linkedin: 'https://www.linkedin.com/in/hari-s-224283317', github: 'https://github.com/Hari02-S' },
-  { id: 's-11', sNo: 11, rollNo: '22CT24016', name: 'Iswarya M E', email: 'iswaryaemmanuvel@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '78%', mark11: '73%', mark12: '75%', group: '-', medium: 'English', bloodGroup: 'O+VE', dob: '22.09.2006', phone: '6369595651', linkedin: 'https://www.linkedin.com/in/iswarya-emmanuvel-171288317', github: 'https://github.com/iswarya229' },
-  { id: 's-12', sNo: 12, rollNo: '22CT24022', name: 'Janani R', email: 'janani.dreams4@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '70%', mark11: '68%', mark12: '75%', group: 'Computer application', medium: 'English', bloodGroup: 'B+VE', dob: '25.11.2006', phone: '9123593448', linkedin: 'https://www.linkedin.com/in/janani-raja-232288317', github: 'https://github.com/JANANI-CO' },
-  { id: 's-13', sNo: 13, rollNo: '22CT24027', name: 'Joyal V', email: 'Joyalv1008@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '63%', mark11: '56%', mark12: '57%', group: 'Computer application', medium: 'English', bloodGroup: 'B+VE', dob: '10.05.2007', phone: '8778497072', linkedin: 'https://www.linkedin.com/in/joyal-v-83248231a', github: 'https://github.com/Joyal1008' },
-  { id: 's-14', sNo: 14, rollNo: '22CT24031', name: 'Karpagavalli P', email: 'pkarpagavalli2006@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '86%', mark11: '92%', mark12: '96%', group: 'Computer application', medium: 'English', bloodGroup: 'O+VE', dob: '26.09.2006', phone: '8189950226', linkedin: 'https://in.linkedin.com/in/karpagavalli-a46282317', github: 'https://github.com/karpagavalli26' },
-  { id: 's-15', sNo: 15, rollNo: '22CT24029', name: 'Karthik K', email: 'karthik16062007k@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '82%', mark11: '74%', mark12: '76%', group: 'Biology,computer science', medium: 'English', bloodGroup: 'B+VE', dob: '16.06.2007', phone: '7695982755', linkedin: 'https://www.linkedin.com/in/karthik-k-b64838316', github: 'https://github.com/Karthik2007k' },
-  { id: 's-16', sNo: 16, rollNo: '22CT24001', name: 'Kavin E S', email: 'imkavin74@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '86%', mark11: '77%', mark12: '78%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '16.06.2007', phone: '9566389394', linkedin: 'https://www.linkedin.com/in/ghost-55045b28b', github: 'https://github.com/Ghost-74' },
-  { id: 's-17', sNo: 17, rollNo: '22CT24005', name: 'Maithees P', email: 'maithees215@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '64%', mark11: '64%', mark12: '68%', group: 'maths, computer science', medium: 'English', bloodGroup: 'A+VE', dob: '12.11.2006', phone: '6381285152', linkedin: 'https://www.linkedin.com/in/maithees-maithees-30b179315', github: 'https://github.com/MAITHEES' },
-  { id: 's-18', sNo: 18, rollNo: '22CT24015', name: 'Nehaa M R', email: 'nehaamr970@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '90%', mark11: 'NA', mark12: '54%', group: 'Biology,Computer science', medium: 'English', bloodGroup: 'B+VE', dob: '27.06.2007', phone: '9345521970', linkedin: 'https://www.linkedin.com/in/nehaa-murugesan-92b644315', github: 'https://github.com/nehaa45521970' },
-  { id: 's-19', sNo: 19, rollNo: '22CT24006', name: 'Prakash M', email: 'prakashm112006@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '69%', mark11: '58%', mark12: '66%', group: 'maths, biology', medium: 'English', bloodGroup: 'O+VE', dob: '16.11.2006', phone: '9787612557', linkedin: 'https://www.linkedin.com/in/m-prakash-b7317a315/', github: 'https://github.com/prakash-bscct' },
-  { id: 's-20', sNo: 20, rollNo: '22CT24014', name: 'Prasanna V', email: 'madaraxuchihax14@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '72%', mark11: '58%', mark12: '70%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B-VE', dob: '22.08.2006', phone: '9344167326', linkedin: 'https://www.linkedin.com/in/v-prasanna-982049317/', github: 'https://github.com/Prasannax14' },
-  { id: 's-21', sNo: 21, rollNo: '22CT24012', name: 'Priscilla P', email: 'priscilla.mailbox0105@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '46%', mark11: '57%', mark12: '62%', group: 'arts', medium: 'English', bloodGroup: 'B+VE', dob: '01.05.2006', phone: '8610386752', linkedin: 'https://linkedIn.com/in/priscilla-priscilla-a54282317/', github: 'https://github.com/Priscilla0105' },
-  { id: 's-22', sNo: 22, rollNo: '22CT24023', name: 'Priya G', email: 'ppriyagovindasamy@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '73%', mark11: '71%', mark12: '83%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '10.04.2007', phone: '6383682929', linkedin: 'https://www.linkedin.com/in/priyagovindasamy', github: 'https://github.com/priya1004720' },
-  { id: 's-23', sNo: 23, rollNo: '22CT24013', name: 'Rebekkha Thavamani M', email: 'rebekkhathavamani@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '65%', mark11: '77%', mark12: '85%', group: 'arts', medium: 'English', bloodGroup: 'A+VE', dob: '25.01.2007', phone: '9345003531', linkedin: 'https://www.linkedin.com/in/rebekkha-thavamani-bb2715316/', github: 'https://github.com/rebekkhathavamani' },
-  { id: 's-24', sNo: 24, rollNo: '22CT24026', name: 'Rubasree K', email: 'rubasreek09@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '52%', mark11: '48%', mark12: '49%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '04.04.2007', phone: '8056795821', linkedin: 'https://www.linkedin.com/in/rubasree-k-612593317', github: 'https://github.com/Rubasree858' },
-  { id: 's-25', sNo: 25, rollNo: '22CT24002', name: 'Sabareesh G', email: 'sabareeshgm47@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '62%', mark11: '70%', mark12: '77%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '07.07.2007', phone: '7845840747', linkedin: 'https://www.linkedin.com/in/sabareesh-ganeshmoorthi-5aa180315', github: 'https://github.com/Frozen-47' },
-  { id: 's-26', sNo: 26, rollNo: '22CT24019', name: 'Sanjaikumar R', email: 'sanjaikumar62297@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '57%', mark11: '51%', mark12: '74%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '16.06.2007', phone: '8903394628', linkedin: 'https://www.linkedin.com/in/sanjai-kumar-94b7714316', github: 'https://github.com/sanjaikumar16062007' },
-  { id: 's-27', sNo: 27, rollNo: '22CT24032', name: 'Sarmini A', email: 'sarmisarmi8430@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '67%', mark11: '75%', mark12: '78%', group: 'Computer application', medium: 'English', bloodGroup: 'B+VE', dob: '23.07.2006', phone: '9342843715', linkedin: 'https://linkedin.com/in/sarmi-sarmi-492048317', github: 'https://github.com/sharmini2006' },
-  { id: 's-28', sNo: 28, rollNo: '22CT24039', name: 'Sheeba A', email: 'sheebaa512@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '79%', mark11: 'NA', mark12: '71%', group: 'Math , computer science, biology', medium: 'English', bloodGroup: 'B+VE', dob: '14.04.2007', phone: '8270907159', linkedin: 'https://www.linkedin.com/in/a-sheeba-88a97b287/', github: 'https://github.com/Sheebaa12' },
-  { id: 's-29', sNo: 29, rollNo: '22CT24009', name: 'Sivakumar D', email: 'sivaerd293@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '69%', mark11: '62%', mark12: '69%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '04.03.2006', phone: '7200883700', linkedin: 'https://www.linkedin.com/in/siva-kumar-323065317', github: 'https://github.com/sivakumar-2006' },
-  { id: 's-30', sNo: 30, rollNo: '22CT24030', name: 'Siva Pratheepa T', email: 'pratheepasiva2007@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '79%', mark11: '84%', mark12: '90%', group: 'arts', medium: 'English', bloodGroup: 'B+VE', dob: '12.04.2007', phone: '9150718535', linkedin: 'https://www.linkedin.com/in/siva-pratheepa-014284317', github: 'https://github.com/sivapratheepa' },
-  { id: 's-31', sNo: 31, rollNo: '22CT24035', name: 'Sneha G A', email: 'gasneha2024@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '71%', mark11: '77%', mark12: '81%', group: 'Business maths, accountancy', medium: 'English', bloodGroup: 'O+VE', dob: '01.12.2006', phone: '9500697080', linkedin: 'https://www.linkedin.com/in/sneha-g-a-511b03319', github: 'https://github.com/SNEHA178' },
-  { id: 's-32', sNo: 32, rollNo: '22CT24003', name: 'Srivathsan V', email: 'srivathsandharun@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '61%', mark11: '51%', mark12: '56%', group: 'arts', medium: 'English', bloodGroup: 'A+VE', dob: '12.05.2007', phone: '9894371065', linkedin: 'https://www.linkedin.com/in/srivathsan-dharun-954043317', github: 'https://github.com/srivathsan600' },
-  { id: 's-33', sNo: 33, rollNo: '22CT24033', name: 'Vinith D', email: 'Vinithd5727@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '58%', mark11: '43%', mark12: '51%', group: '-', medium: 'TAMIL', bloodGroup: 'A+VE', dob: '05.09.2007', phone: '6369435727', linkedin: 'https://www.linkedin.com/in/vini-9b300318', github: 'https://github.com/Vinith-D05' },
-  { id: 's-34', sNo: 34, rollNo: '22CT24020', name: 'Yogalakshmi R', email: 'yogu47640@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '82%', mark11: '81%', mark12: '87%', group: 'Biology, computer science', medium: 'English', bloodGroup: 'A1B+VE', dob: '12.02.2007', phone: '6374880326', linkedin: 'https://www.linkedin.com/in/yogalakshmi-rajamanickam-057366317', github: 'https://github.com/Yoga1203' }
+  { id: 's-1', sNo: 1, rollNo: '22CT24038', name: 'Akash V', email: 'akasha09960@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '59%', mark11: '64%', mark12: '72%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B+VE', dob: '12.11.2007', phone: '9629346096', linkedin: 'https://www.linkedin.com/in/akash-v-8131a0321', github: 'https://github.com/AkashV-V', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-2', sNo: 2, rollNo: '22CT24007', name: 'Bharathi nesan M', email: 'nesan262936@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '58%', mark11: '78%', mark12: '87%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '23.09.2006', phone: '6374453817', linkedin: 'https://www.linkedin.com/in/bharathi-nesan-aa0049317', github: 'https://github.com/bharathi925', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-3', sNo: 3, rollNo: '22CT24010', name: 'Buvanesh M', email: 'buvanesh2309@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '50%', mark11: '60%', mark12: '57%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B+VE', dob: '23.09.2006', phone: '9080570836', linkedin: 'https://www.linkedin.com/in/buvanesh-b-253588315', github: 'https://github.com/BUVANESH2006', feeStatus: 'Partial', totalFee: 45000, paidAmount: 25000, dueDate: '15.10.2026' },
+  { id: 's-4', sNo: 4, rollNo: '22CT24008', name: 'Boomes N', email: 'boomesnallasivam06@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '77%', mark11: '60%', mark12: '63%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '27.08.2006', phone: '8524044264', linkedin: 'https://www.linkedin.com/in/boomes-nallasivam-911282317', github: 'https://github.com/Boomesh006', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-5', sNo: 5, rollNo: '22CT24025', name: 'Charuhasini J', email: 'charuhasinijothikumar@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '49%', mark11: '55%', mark12: '58%', group: 'arts', medium: 'English', bloodGroup: 'B+VE', dob: '01.12.2006', phone: '9363641697', linkedin: '', github: 'https://github.com/charuhasini07', feeStatus: 'Pending', totalFee: 45000, paidAmount: 0, dueDate: '30.09.2026' },
+  { id: 's-6', sNo: 6, rollNo: '22CT24021', name: 'Devan R', email: 'devandevan80162@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '59%', mark11: '55%', mark12: '61%', group: 'maths, biology', medium: 'English', bloodGroup: 'O+VE', dob: '13.11.2004', phone: '9342893168', linkedin: 'https://www.linkedin.com/in/devan-r-9b257a304', github: 'https://github.com/Devan3405', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-7', sNo: 7, rollNo: '22CT24028', name: 'Dharmar S', email: 'gukan2711@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '40%', mark11: '53%', mark12: '48%', group: 'Biology,Computer science', medium: 'Tamil', bloodGroup: 'B+VE', dob: '27.11.2006', phone: '8098667074', linkedin: 'https://www.linkedin.com/in/gukan-gugan-9b3282317', github: 'https://github.com/Gukan-89', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-8', sNo: 8, rollNo: '22CT24024', name: 'Gowtham R', email: 'gowthamram1211@outlook.com', classGroup: '3rd CT (2024-2027)', mark10: '59%', mark11: '68%', mark12: '75%', group: 'Arts,history,acc,eco,commerce', medium: 'Tamil', bloodGroup: 'O+VE', dob: '28.02.2007', phone: '6379323168', linkedin: 'https://www.linkedin.com/in/s-gowtham-476047317', github: 'https://github.com/gowtham508', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-9', sNo: 9, rollNo: '22CT24034', name: 'Gowtham S', email: 'gowtham.s.63793231@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '53%', mark11: '67%', mark12: '73%', group: 'arts', medium: 'Tamil', bloodGroup: 'A+VE', dob: '28.02.2007', phone: '9043328254', linkedin: 'https://www.linkedin.com/in/gowtham-ram-036b2131a', github: 'https://github.com/Gowtham12112006', feeStatus: 'Partial', totalFee: 45000, paidAmount: 30000, dueDate: '20.10.2026' },
+  { id: 's-10', sNo: 10, rollNo: '22CT24004', name: 'Hari S', email: 'harism0220@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '76%', mark11: '59%', mark12: '69%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B+VE', dob: '02.10.2006', phone: '9865471935', linkedin: 'https://www.linkedin.com/in/hari-s-224283317', github: 'https://github.com/Hari02-S', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-11', sNo: 11, rollNo: '22CT24016', name: 'Iswarya M E', email: 'iswaryaemmanuvel@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '78%', mark11: '73%', mark12: '75%', group: '-', medium: 'English', bloodGroup: 'O+VE', dob: '22.09.2006', phone: '6369595651', linkedin: 'https://www.linkedin.com/in/iswarya-emmanuvel-171288317', github: 'https://github.com/iswarya229', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-12', sNo: 12, rollNo: '22CT24022', name: 'Janani R', email: 'janani.dreams4@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '70%', mark11: '68%', mark12: '75%', group: 'Computer application', medium: 'English', bloodGroup: 'B+VE', dob: '25.11.2006', phone: '9123593448', linkedin: 'https://www.linkedin.com/in/janani-raja-232288317', github: 'https://github.com/JANANI-CO', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-13', sNo: 13, rollNo: '22CT24027', name: 'Joyal V', email: 'Joyalv1008@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '63%', mark11: '56%', mark12: '57%', group: 'Computer application', medium: 'English', bloodGroup: 'B+VE', dob: '10.05.2007', phone: '8778497072', linkedin: 'https://www.linkedin.com/in/joyal-v-83248231a', github: 'https://github.com/Joyal1008', feeStatus: 'Pending', totalFee: 45000, paidAmount: 0, dueDate: '15.10.2026' },
+  { id: 's-14', sNo: 14, rollNo: '22CT24031', name: 'Karpagavalli P', email: 'pkarpagavalli2006@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '86%', mark11: '92%', mark12: '96%', group: 'Computer application', medium: 'English', bloodGroup: 'O+VE', dob: '26.09.2006', phone: '8189950226', linkedin: 'https://in.linkedin.com/in/karpagavalli-a46282317', github: 'https://github.com/karpagavalli26', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-15', sNo: 15, rollNo: '22CT24029', name: 'Karthik K', email: 'karthik16062007k@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '82%', mark11: '74%', mark12: '76%', group: 'Biology,computer science', medium: 'English', bloodGroup: 'B+VE', dob: '16.06.2007', phone: '7695982755', linkedin: 'https://www.linkedin.com/in/karthik-k-b64838316', github: 'https://github.com/Karthik2007k', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-16', sNo: 16, rollNo: '22CT24001', name: 'Kavin E S', email: 'imkavin74@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '86%', mark11: '77%', mark12: '78%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '16.06.2007', phone: '9566389394', linkedin: 'https://www.linkedin.com/in/ghost-55045b28b', github: 'https://github.com/Ghost-74', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-17', sNo: 17, rollNo: '22CT24005', name: 'Maithees P', email: 'maithees215@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '64%', mark11: '64%', mark12: '68%', group: 'maths, computer science', medium: 'English', bloodGroup: 'A+VE', dob: '12.11.2006', phone: '6381285152', linkedin: 'https://www.linkedin.com/in/maithees-maithees-30b179315', github: 'https://github.com/MAITHEES', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-18', sNo: 18, rollNo: '22CT24015', name: 'Nehaa M R', email: 'nehaamr970@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '90%', mark11: 'NA', mark12: '54%', group: 'Biology,Computer science', medium: 'English', bloodGroup: 'B+VE', dob: '27.06.2007', phone: '9345521970', linkedin: 'https://www.linkedin.com/in/nehaa-murugesan-92b644315', github: 'https://github.com/nehaa45521970', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-19', sNo: 19, rollNo: '22CT24006', name: 'Prakash M', email: 'prakashm112006@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '69%', mark11: '58%', mark12: '66%', group: 'maths, biology', medium: 'English', bloodGroup: 'O+VE', dob: '16.11.2006', phone: '9787612557', linkedin: 'https://www.linkedin.com/in/m-prakash-b7317a315/', github: 'https://github.com/prakash-bscct', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-20', sNo: 20, rollNo: '22CT24014', name: 'Prasanna V', email: 'madaraxuchihax14@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '72%', mark11: '58%', mark12: '70%', group: 'maths, computer science', medium: 'English', bloodGroup: 'B-VE', dob: '22.08.2006', phone: '9344167326', linkedin: 'https://www.linkedin.com/in/v-prasanna-982049317/', github: 'https://github.com/Prasannax14', feeStatus: 'Partial', totalFee: 45000, paidAmount: 20000, dueDate: '25.10.2026' },
+  { id: 's-21', sNo: 21, rollNo: '22CT24012', name: 'Priscilla P', email: 'priscilla.mailbox0105@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '46%', mark11: '57%', mark12: '62%', group: 'arts', medium: 'English', bloodGroup: 'B+VE', dob: '01.05.2006', phone: '8610386752', linkedin: 'https://linkedIn.com/in/priscilla-priscilla-a54282317/', github: 'https://github.com/Priscilla0105', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-22', sNo: 22, rollNo: '22CT24023', name: 'Priya G', email: 'ppriyagovindasamy@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '73%', mark11: '71%', mark12: '83%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '10.04.2007', phone: '6383682929', linkedin: 'https://www.linkedin.com/in/priyagovindasamy', github: 'https://github.com/priya1004720', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-23', sNo: 23, rollNo: '22CT24013', name: 'Rebekkha Thavamani M', email: 'rebekkhathavamani@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '65%', mark11: '77%', mark12: '85%', group: 'arts', medium: 'English', bloodGroup: 'A+VE', dob: '25.01.2007', phone: '9345003531', linkedin: 'https://www.linkedin.com/in/rebekkha-thavamani-bb2715316/', github: 'https://github.com/rebekkhathavamani', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-24', sNo: 24, rollNo: '22CT24026', name: 'Rubasree K', email: 'rubasreek09@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '52%', mark11: '48%', mark12: '49%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '04.04.2007', phone: '8056795821', linkedin: 'https://www.linkedin.com/in/rubasree-k-612593317', github: 'https://github.com/Rubasree858', feeStatus: 'Pending', totalFee: 45000, paidAmount: 0, dueDate: '10.10.2026' },
+  { id: 's-25', sNo: 25, rollNo: '22CT24002', name: 'Sabareesh G', email: 'sabareeshgm47@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '62%', mark11: '70%', mark12: '77%', group: 'maths, computer science', medium: 'English', bloodGroup: 'O+VE', dob: '07.07.2007', phone: '7845840747', linkedin: 'https://www.linkedin.com/in/sabareesh-ganeshmoorthi-5aa180315', github: 'https://github.com/Frozen-47', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-26', sNo: 26, rollNo: '22CT24019', name: 'Sanjaikumar R', email: 'sanjaikumar62297@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '57%', mark11: '51%', mark12: '74%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '16.06.2007', phone: '8903394628', linkedin: 'https://www.linkedin.com/in/sanjai-kumar-94b7714316', github: 'https://github.com/sanjaikumar16062007', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-27', sNo: 27, rollNo: '22CT24032', name: 'Sarmini A', email: 'sarmisarmi8430@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '67%', mark11: '75%', mark12: '78%', group: 'Computer application', medium: 'English', bloodGroup: 'B+VE', dob: '23.07.2006', phone: '9342843715', linkedin: 'https://linkedin.com/in/sarmi-sarmi-492048317', github: 'https://github.com/sharmini2006', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-28', sNo: 28, rollNo: '22CT24039', name: 'Sheeba A', email: 'sheebaa512@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '79%', mark11: 'NA', mark12: '71%', group: 'Math , computer science, biology', medium: 'English', bloodGroup: 'B+VE', dob: '14.04.2007', phone: '8270907159', linkedin: 'https://www.linkedin.com/in/a-sheeba-88a97b287/', github: 'https://github.com/Sheebaa12', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-29', sNo: 29, rollNo: '22CT24009', name: 'Sivakumar D', email: 'sivaerd293@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '69%', mark11: '62%', mark12: '69%', group: 'arts', medium: 'English', bloodGroup: 'O+VE', dob: '04.03.2006', phone: '7200883700', linkedin: 'https://www.linkedin.com/in/siva-kumar-323065317', github: 'https://github.com/sivakumar-2006', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-30', sNo: 30, rollNo: '22CT24030', name: 'Siva Pratheepa T', email: 'pratheepasiva2007@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '79%', mark11: '84%', mark12: '90%', group: 'arts', medium: 'English', bloodGroup: 'B+VE', dob: '12.04.2007', phone: '9150718535', linkedin: 'https://www.linkedin.com/in/siva-pratheepa-014284317', github: 'https://github.com/sivapratheepa', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-31', sNo: 31, rollNo: '22CT24035', name: 'Sneha G A', email: 'gasneha2024@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '71%', mark11: '77%', mark12: '81%', group: 'Business maths, accountancy', medium: 'English', bloodGroup: 'O+VE', dob: '01.12.2006', phone: '9500697080', linkedin: 'https://www.linkedin.com/in/sneha-g-a-511b03319', github: 'https://github.com/SNEHA178', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-32', sNo: 32, rollNo: '22CT24003', name: 'Srivathsan V', email: 'srivathsandharun@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '61%', mark11: '51%', mark12: '56%', group: 'arts', medium: 'English', bloodGroup: 'A+VE', dob: '12.05.2007', phone: '9894371065', linkedin: 'https://www.linkedin.com/in/srivathsan-dharun-954043317', github: 'https://github.com/srivathsan600', feeStatus: 'Partial', totalFee: 45000, paidAmount: 25000, dueDate: '18.10.2026' },
+  { id: 's-33', sNo: 33, rollNo: '22CT24033', name: 'Vinith D', email: 'Vinithd5727@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '58%', mark11: '43%', mark12: '51%', group: '-', medium: 'TAMIL', bloodGroup: 'A+VE', dob: '05.09.2007', phone: '6369435727', linkedin: 'https://www.linkedin.com/in/vini-9b300318', github: 'https://github.com/Vinith-D05', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' },
+  { id: 's-34', sNo: 34, rollNo: '22CT24020', name: 'Yogalakshmi R', email: 'yogu47640@gmail.com', classGroup: '3rd CT (2024-2027)', mark10: '82%', mark11: '81%', mark12: '87%', group: 'Biology, computer science', medium: 'English', bloodGroup: 'A1B+VE', dob: '12.02.2007', phone: '6374880326', linkedin: 'https://www.linkedin.com/in/yogalakshmi-rajamanickam-057366317', github: 'https://github.com/Yoga1203', feeStatus: 'Paid', totalFee: 45000, paidAmount: 45000, dueDate: 'Cleared' }
 ];
 
 export const INITIAL_CLASSES: ClassInstance[] = [
