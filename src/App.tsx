@@ -12,8 +12,36 @@ import { SUPABASE_CONFIG } from './config/supabase';
 import type { Course, Instructor, ClassInstance, Student, Enrollment } from './mock/mockData';
 
 function App() {
-  // Protection Layer State (Hard locked for live build phase)
-  const [isProtected] = useState<boolean>(true);
+  // Protection Layer State (Locked by default, unlocked via console unlock(6369611) or sessionStorage)
+  const [isProtected, setIsProtected] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('ctspace_unlocked') !== 'true';
+    }
+    return true;
+  });
+
+  // Console input handler for code 6369611
+  useEffect(() => {
+    const unlockHandler = (code: string | number) => {
+      if (String(code).trim() === '6369611') {
+        setIsProtected(false);
+        sessionStorage.setItem('ctspace_unlocked', 'true');
+        console.log('%c[CTSpace] Protection layer removed successfully.', 'color: #10b981; font-weight: bold; font-size: 14px;');
+        return 'Protection layer removed successfully!';
+      } else {
+        console.warn('[CTSpace] Invalid authorization code.');
+        return 'Invalid code.';
+      }
+    };
+
+    (window as any).unlock = unlockHandler;
+    (window as any).ctspace = unlockHandler;
+
+    return () => {
+      delete (window as any).unlock;
+      delete (window as any).ctspace;
+    };
+  }, []);
 
   // Navigation & Theme State
   const [activeTab, setActiveTab] = useState<string>('dashboard');
