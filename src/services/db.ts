@@ -15,15 +15,23 @@ if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
   }
 }
 
-// --- Time & Conflict Helpers ---
+// Helper for safe query logging and status tracking
+export function logServiceEvent(event: string, details?: Record<string, any>): void {
+  if (import.meta.env.DEV) {
+    console.log(`[DB Service] ${event}`, details || '');
+  }
+}
 
 export function parseTime(timeStr: string): number {
+  if (!timeStr || typeof timeStr !== 'string') return 0;
   const parts = timeStr.trim().split(/\s+/);
   if (parts.length !== 2) return 0;
   const [hoursStr, minutesStr] = parts[0].split(':');
   let hours = parseInt(hoursStr, 10);
   const minutes = parseInt(minutesStr, 10);
   const ampm = parts[1].toUpperCase();
+
+  if (isNaN(hours) || isNaN(minutes)) return 0;
 
   if (ampm === 'PM' && hours < 12) hours += 12;
   if (ampm === 'AM' && hours === 12) hours = 0;
