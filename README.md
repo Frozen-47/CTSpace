@@ -1,32 +1,60 @@
-# React + TypeScript + Vite
+# CTSpace - Campus & Classroom Scheduling Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+CTSpace is a modern, high-performance web application designed for campus course management, faculty scheduling, student directory lookups, and administrative controls. Built with React, TypeScript, Vite, and Tailwind/Vanilla CSS.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Multi-Role Dashboard**: Tailored perspectives for Administrators, Faculty, and Students.
+- **Interactive Schedule & Timetable**: Real-time room availability, slot reservations, and conflict prevention.
+- **Directory Management**: Comprehensive search and filtering for students, faculty, and course enrollments.
+- **Course Administration**: Dynamic CRUD interface for managing courses, instructor assignments, and capacities.
+- **Admin & Database Control**: Built-in health metrics, schema configurations, and mock data synchronization.
+- **Role-Based Protection Gate**: Granular component access control based on user authentication level.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Modern CSS design tokens, Glassmorphism, Tailwind utilities
+- **Icons**: Lucide React
+- **Backend / Database**: Supabase Integration & Local IndexedDB fallback
 
-## Expanding the Oxlint configuration
+## 📦 Getting Started
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Prerequisites
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+- Node.js (v18.x or higher)
+- npm or yarn
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Frozen-47/CTSpace.git
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Configure environment variables (optional for Supabase connectivity):
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## 📄 License
+
+MIT License. Developed for Campus Management.
+
