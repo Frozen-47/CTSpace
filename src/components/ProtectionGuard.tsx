@@ -25,8 +25,12 @@ export const ProtectionGuard: React.FC<ProtectionGuardProps> = ({ isProtected })
           </p>
         </div>
 
-        <div className="pt-4 border-t border-white/10 text-[11px] text-zinc-500 font-mono">
-          System Status: Under Active Construction
+        <div className="pt-4 border-t border-white/10 text-[11px] text-zinc-500 font-mono flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            System Maintenance Active
+          </span>
+          <span className="text-zinc-400 font-sans">v1.2.0</span>
         </div>
       </div>
     </div>
