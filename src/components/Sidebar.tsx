@@ -105,9 +105,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       <div className="border-t border-[var(--border-color)] pt-4 flex flex-col gap-3">
-        <div className="flex items-center gap-2 px-3 py-2 bg-[var(--bg-card)] rounded-md border border-[var(--border-color)] text-xs text-[var(--text-secondary)] font-medium">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-          <span>Supabase Connected</span>
+        <div className="flex items-center justify-between px-3 py-2 bg-[var(--bg-card)] rounded-md border border-[var(--border-color)] text-xs text-[var(--text-secondary)] font-medium">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <span>Supabase Online</span>
+          </div>
+          <span className="text-[10px] text-[var(--text-muted)] font-mono">v1.2</span>
         </div>
         
         <button 
