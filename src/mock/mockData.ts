@@ -21,6 +21,9 @@ export const CLASS_GROUPS = [
   '2nd BBA (2025-2027)'
 ] as const;
 
+export const AVAILABLE_ROOMS = ['Lab 1', 'Lab 2', 'Lab 3', 'Hall A', 'Hall B', 'Room 201'] as const;
+export const AVAILABLE_TERMS = ['Fall 2026', 'Spring 2026', 'Summer 2026'] as const;
+
 export type ClassGroupType = typeof CLASS_GROUPS[number];
 
 export interface Student {
