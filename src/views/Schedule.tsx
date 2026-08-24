@@ -64,7 +64,9 @@ export const Schedule: React.FC<ScheduleProps> = ({
       <header className="flex items-center justify-between mb-2">
         <div>
           <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Schedule</h1>
-          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Course timetable allocations, faculty duties, and classroom bookings.</p>
+          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
+            Course timetable allocations ({filteredClasses.length} sessions active in {termFilter})
+          </p>
         </div>
         <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer shadow-sm" onClick={onAddClass}>
           <Plus size={15} />
