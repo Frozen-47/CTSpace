@@ -41,7 +41,9 @@ export const Courses: React.FC<CoursesProps> = ({
       <header className="flex items-center justify-between mb-2">
         <div>
           <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Curriculum</h1>
-          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Course catalog listings and syllabus details.</p>
+          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
+            Course catalog listings ({filteredCourses.length} of {courses.length} active courses)
+          </p>
         </div>
         <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--text-primary)] hover:bg-[var(--primary-hover)] text-[var(--bg-app)] text-xs font-semibold transition cursor-pointer shadow-sm" onClick={onAddCourse}>
           <Plus size={15} />
