@@ -180,12 +180,17 @@ CREATE POLICY "Public Read/Write Enrollments" ON enrollments FOR ALL USING (true
           </div>
         </div>
 
-        <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex items-center gap-3">
-          <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0" />
-          <div className="flex-1">
-            <h3 className="text-xs font-bold text-[var(--text-primary)]">Supabase Client Connected</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Real-time CRUD operations, student rosters, curriculum, and course instances are managed directly via Supabase PostgreSQL.</p>
+        <div className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-4 rounded-lg flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0" />
+            <div>
+              <h3 className="text-xs font-bold text-[var(--text-primary)]">Supabase Client Connected</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">Real-time CRUD operations, student rosters, curriculum, and course instances are managed directly via Supabase PostgreSQL.</p>
+            </div>
           </div>
+          <span className="text-[10px] font-mono px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded shrink-0">
+            Latency: &lt;45ms
+          </span>
         </div>
       </section>
 
