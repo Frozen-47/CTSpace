@@ -118,8 +118,10 @@ export const Directory: React.FC<DirectoryProps> = ({
     <div className="flex flex-col animate-fade-in pb-12">
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Student Directory & Academic Database</h1>
-          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">Student Profiles, 10th/11th/12th Marks, Fee Payment Status & Social Accounts.</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Directory</h1>
+          <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
+            Department roster directory ({students.length} students, {instructors.length} faculty members)
+          </p>
         </div>
         <div>
           {activeTab === 'faculty' ? (
