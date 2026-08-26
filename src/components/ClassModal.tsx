@@ -36,6 +36,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
     if (!isOpen) return;
     setError(null);
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
     if (initialData) {
       setFormData({ ...initialData });
     } else {
@@ -65,7 +70,11 @@ export const ClassModal: React.FC<ClassModalProps> = ({
         });
       }
     }
-  }, [isOpen, type, initialData, courses, instructors, students, classes]);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, type, initialData, courses, instructors, students, classes, onClose]);
 
   if (!isOpen) return null;
 
