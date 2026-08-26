@@ -35,6 +35,7 @@ function App() {
         sessionStorage.setItem('ctspace_unlocked', 'true');
         console.log(`%c[CTSpace] 5 refreshes completed (${currentCount}). Protection layer automatically removed.`, 'color: #10b981; font-weight: bold; font-size: 13px;');
       }
+      console.log('[CTSpace] Root state sync initialized.');
     } catch {
       // Storage access safety
     }
