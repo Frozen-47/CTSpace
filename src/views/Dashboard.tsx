@@ -168,10 +168,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {currentRole === 'faculty' && <UserCheck size={22} className="text-emerald-400" />}
             {currentRole === 'student' && <GraduationCap size={22} className="text-sky-400" />}
             <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
-              {currentRole === 'admin' && 'Student Data & Fee Management Center'}
-              {currentRole === 'faculty' && 'Faculty Workspace'}
-              {currentRole === 'student' && 'Student Portal & Fee Status'}
+              {currentRole === 'admin' && 'Department Overview & Control Center'}
+              {currentRole === 'faculty' && 'Faculty Workspace & Class Monitor'}
+              {currentRole === 'student' && 'Student Portal & Academic Dashboard'}
             </h1>
+            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[var(--bg-card-hover)] text-[var(--text-muted)] border border-[var(--border-color)]">
+              Aug 26, 2026
+            </span>
           </div>
           <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
             {currentRole === 'admin' && 'Department student records, fee collection status, and 10th/11th/12th marks analytics.'}
