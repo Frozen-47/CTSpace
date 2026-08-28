@@ -7,3 +7,5 @@ export const SUPABASE_CONFIG = {
   getUseSupabase: (): boolean => true,
   setUseSupabase: (_value: boolean) => {}
 };
+
+// Config helper updated 2026-08-28
