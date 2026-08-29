@@ -492,3 +492,5 @@ export const Directory: React.FC<DirectoryProps> = ({
     </div>
   );
 };
+
+// Directory view updated 2026-08-29
