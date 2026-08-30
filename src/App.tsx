@@ -339,3 +339,5 @@ function App() {
 }
 
 export default App;
+
+// App entry layout update 2026-08-30
