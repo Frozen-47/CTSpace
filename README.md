@@ -60,3 +60,5 @@ MIT License. Developed for Campus Management.
 
 
 <!-- Log update: 2026-08-28 09:14 - Documentation setup -->
+
+<!-- Log update: 2026-08-30 20:15 - Feature schedule integrated -->
