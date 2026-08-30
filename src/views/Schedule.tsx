@@ -194,3 +194,5 @@ export const Schedule: React.FC<ScheduleProps> = ({
     </div>
   );
 };
+
+// Schedule view refactored 2026-08-30
