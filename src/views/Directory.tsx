@@ -494,3 +494,5 @@ export const Directory: React.FC<DirectoryProps> = ({
 };
 
 // Directory view updated 2026-08-29
+
+// Directory state cleanup 2026-08-31
